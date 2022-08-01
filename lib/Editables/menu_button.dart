@@ -16,16 +16,16 @@ class _MenuButtonState extends State<MenuButton> {
   @override
   Widget build(BuildContext context) {
     return TextButton(
+      onPressed: widget.onPressed,
       child: Container(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Align(
+        child: ListTile(
+          title: Align(
             alignment: Alignment.centerLeft,
             child: widget.child,
           ),
+          trailing: Icon(Icons.keyboard_arrow_right),
         ),
       ),
-      onPressed: widget.onPressed,
     );
   }
 }

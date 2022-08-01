@@ -14,6 +14,7 @@ class MainScaffold extends StatelessWidget {
       body: RobotPageView(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
+        child: Icon(Icons.add),
       ),
     );
   }
