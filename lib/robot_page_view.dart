@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'Semieditables/robot_menu.dart';
 
-class RobotPageView extends StatelessWidget {
+class RobotPageView extends StatefulWidget {
+  final int basePageCount;
   const RobotPageView({
+    this.basePageCount = 0,
     Key? key,
   }) : super(key: key);
 
+  @override
+  State<RobotPageView> createState() => _RobotPageViewState();
+}
+
+class _RobotPageViewState extends State<RobotPageView> {
+  int pageCount = 0;
   @override
   Widget build(BuildContext context) {
     final controller = PageController(
@@ -19,7 +27,7 @@ class RobotPageView extends StatelessWidget {
           robotName: "Marius$index",
         );
       },
-      itemCount: 4,
+      itemCount: pageCount + widget.basePageCount,
     );
   }
 }

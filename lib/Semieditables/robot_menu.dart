@@ -14,7 +14,8 @@ class ConnectedRobotMenu extends StatefulWidget {
   State<ConnectedRobotMenu> createState() => _ConnectedRobotMenuState();
 }
 
-class _ConnectedRobotMenuState extends State<ConnectedRobotMenu> {
+class _ConnectedRobotMenuState extends State<ConnectedRobotMenu>
+    with AutomaticKeepAliveClientMixin<ConnectedRobotMenu> {
   Map stateMenuPopupItems = {
     Text("active"): "active",
     Text("inactive"): "inactive",
@@ -29,59 +30,62 @@ class _ConnectedRobotMenuState extends State<ConnectedRobotMenu> {
   late final b1 = Theme.of(context).textTheme.bodyLarge;
   late final headline = Theme.of(context).textTheme.headline2;
 
-  late final List<Widget> menuItems = [
-    Padding(
-      padding: const EdgeInsets.all(32.0),
-      child: Text(
-        'Bot ${widget.robotName ?? "Noname"} is connected',
-        style: headline,
-        textAlign: TextAlign.center,
-      ),
-    ),
-    Image.asset(
-      widget.robotPhotoPath,
-      fit: BoxFit.scaleDown,
-      height: widget.displayImageHeight,
-    ),
-    MenuButton(
-      onPressed: () {
-        makeMenuPopup(
-            context: context,
-            elements: stateMenuPopupItems,
-            currentItem: stateMenuSelectedItem,
-            onChanged: (value) {
-              setState(() {
-                print(stateMenuSelectedItem);
-                stateMenuSelectedItem = value;
-              });
-            });
-      },
-      child: Text('Status: ${stateMenuSelectedItem ?? " not selected"}',
-          style: b1),
-    ),
-    MenuButton(
-      onPressed: () {
-        makeMenuPopup(
-            context: context,
-            elements: activationModeMenuPopupItems,
-            currentItem: activationMenuSelectedItem,
-            onChanged: (value) {
-              setState(() {
-                activationMenuSelectedItem = value;
-              });
-            });
-      },
-      child: Text(
-          'Activation Mode: ${activationMenuSelectedItem ?? " not selected"}',
-          style: b1),
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final List<Widget> menuItems = [
+      Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Text(
+          'Bot ${widget.robotName ?? "Noname"} is connected',
+          style: headline,
+          textAlign: TextAlign.center,
+        ),
+      ),
+      Image.asset(
+        widget.robotPhotoPath,
+        fit: BoxFit.scaleDown,
+        height: widget.displayImageHeight,
+      ),
+      MenuButton(
+        onPressed: () {
+          makeMenuPopup(
+              context: context,
+              elements: stateMenuPopupItems,
+              currentItem: stateMenuSelectedItem,
+              onChanged: (value) {
+                setState(() {
+                  print(stateMenuSelectedItem);
+                  stateMenuSelectedItem = value;
+                });
+              });
+        },
+        child: Text('Status: ${stateMenuSelectedItem ?? " not selected"}',
+            style: b1),
+      ),
+      MenuButton(
+        onPressed: () {
+          makeMenuPopup(
+              context: context,
+              elements: activationModeMenuPopupItems,
+              currentItem: activationMenuSelectedItem,
+              onChanged: (value) {
+                setState(() {
+                  activationMenuSelectedItem = value;
+                });
+              });
+        },
+        child: Text(
+            'Activation Mode: ${activationMenuSelectedItem ?? " not selected"}',
+            style: b1),
+      ),
+    ];
+
     return ListView.separated(
         itemBuilder: (BuildContext context, int index) => menuItems[index],
         separatorBuilder: (BuildContext context, int index) => const Divider(),
         itemCount: menuItems.length);
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
