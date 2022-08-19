@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MenuPopup extends StatefulWidget {
-  final Map elements;
+  final List<String> elements;
   final void Function(dynamic) onChanged;
   final currentItem;
   const MenuPopup(
@@ -25,12 +25,11 @@ class _MenuPopupState extends State<MenuPopup> {
   @override
   Widget build(BuildContext context) {
     List<Widget> rowButtons = List.generate(widget.elements.length, (index) {
-      var key = widget.elements.keys.elementAt(index);
       return ListTile(
-        title: key,
+        title: Text(widget.elements[index]),
         trailing: Radio(
-          groupValue: widget.currentItem,
-          value: widget.elements[key],
+          groupValue: widget.elements[index],
+          value: widget.elements[index],
           onChanged: (dynamic value) => onItemChanged(value),
         ),
       );
@@ -43,7 +42,7 @@ class _MenuPopupState extends State<MenuPopup> {
 
 void makeMenuPopup(
     {required context,
-    required Map elements,
+    required List<String> elements,
     required currentItem,
     required void Function(dynamic) onChanged}) {
   showDialog(

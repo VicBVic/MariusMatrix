@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/Semieditables/device_discorvery.dart';
+import 'package:flutter_application_1/Semieditables/device_select.dart';
 import 'robot_page_view.dart';
 
 class MainScaffold extends StatefulWidget {
   final String? title;
-  const MainScaffold({this.title, Key? key}) : super(key: key);
+  final int? pageCount;
+  const MainScaffold({this.title, Key? key, this.pageCount}) : super(key: key);
 
   @override
   State<MainScaffold> createState() => _MainScaffoldState();
 }
 
 class _MainScaffoldState extends State<MainScaffold> {
-  int pageCount = 4;
+  late int pageCount = widget.pageCount ?? 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,17 +21,18 @@ class _MainScaffoldState extends State<MainScaffold> {
         title: Text(widget.title ?? ""),
       ),
       body: RobotPageView(
-        basePageCount: pageCount,
+        checkAvalability: true,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          setState(() {
-            final snackBar = SnackBar(
-              content: const Text('Added new robot!'),
-            );
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            pageCount++;
-          });
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => DeviceDiscoveryScreen(
+                      start: false,
+                      onSelected: (device) {},
+                    )),
+          );
         },
         child: Icon(Icons.add),
       ),

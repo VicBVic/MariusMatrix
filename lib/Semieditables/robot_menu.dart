@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Editables/popup_menu.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import '../Editables/menu_button.dart';
 
 class ConnectedRobotMenu extends StatefulWidget {
   final double displayImageHeight = 300;
-  final String? connectionId;
+  final BluetoothDevice device;
   final String robotPhotoPath = 'assets/arduino_STOCK.png';
   final String? robotName;
-  const ConnectedRobotMenu({this.robotName, this.connectionId, Key? key})
+  const ConnectedRobotMenu({this.robotName, required this.device, Key? key})
       : super(key: key);
 
   @override
@@ -16,15 +17,15 @@ class ConnectedRobotMenu extends StatefulWidget {
 
 class _ConnectedRobotMenuState extends State<ConnectedRobotMenu>
     with AutomaticKeepAliveClientMixin<ConnectedRobotMenu> {
-  Map stateMenuPopupItems = {
-    Text("active"): "active",
-    Text("inactive"): "inactive",
-  };
+  final stateMenuPopupItems = [
+    "active",
+    "inactive",
+  ];
   var stateMenuSelectedItem;
-  Map activationModeMenuPopupItems = {
-    Text("manual"): "manual",
-    Text("scheduled"): "scheduled",
-  };
+  final activationModeMenuPopupItems = [
+    "manual",
+    "scheduled",
+  ];
   var activationMenuSelectedItem;
 
   late final b1 = Theme.of(context).textTheme.bodyLarge;
