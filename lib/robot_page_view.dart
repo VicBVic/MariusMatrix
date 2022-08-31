@@ -25,12 +25,16 @@ class RobotPageView extends StatefulWidget {
   final void Function(String adress) onAdressForgor;
   final bool checkAvalability;
   final Set<String> wantedAdresses;
+  final void Function(int) onChangedScreen;
+  final PageController controller;
 
   const RobotPageView({
     Key? key,
     required this.checkAvalability,
     required this.wantedAdresses,
     required this.onAdressForgor,
+    required this.onChangedScreen,
+    required this.controller,
   }) : super(key: key);
 
   @override
@@ -86,12 +90,6 @@ class _RobotPageViewState extends State<RobotPageView> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = PageController(
-      initialPage: 0,
-      keepPage: true,
-    );
-    //print(widget.wantedAdresses);
-
     final nonNullAdresses = widget.wantedAdresses
         .where(
           (element) => element != "",
@@ -103,7 +101,8 @@ class _RobotPageViewState extends State<RobotPageView> {
     }
 
     return PageView(
-      controller: controller,
+      onPageChanged: widget.onChangedScreen,
+      controller: widget.controller,
       children: nonNullAdresses.map(
         (adress) {
           int deviceIndex = bondedDevices

@@ -32,6 +32,15 @@ class _ConnectedRobotMenuState extends State<ConnectedRobotMenu>
   TimeOfDay scheduledEnd = TimeOfDay(hour: 0, minute: 0);
   String? audioName;
   DeviceFileSource? audioSource;
+  String? name;
+  @override
+  void initState() {
+    // TODO: implement initState
+    name = widget.robotName;
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!isManual) isActive = false;
@@ -43,7 +52,7 @@ class _ConnectedRobotMenuState extends State<ConnectedRobotMenu>
       Padding(
         padding: const EdgeInsets.all(32.0),
         child: Text(
-          'Bot ${widget.robotName ?? "Noname"} is connected',
+          'Bot ${name ?? "Noname"} is connected',
           style: headline,
           textAlign: TextAlign.center,
         ),
@@ -120,22 +129,19 @@ class _ConnectedRobotMenuState extends State<ConnectedRobotMenu>
         },
       ),
       Divider(),
-      ListTile(
-        title: Text("Current alarm:"),
-        subtitle: Text(audioName ?? "Musca.mp3"),
-        trailing: ElevatedButton(
-          child: Text("Change"),
-          onPressed: () async {
-            FilePickerResult? result =
-                await FilePicker.platform.pickFiles(type: FileType.audio);
-            if (result != null) {
-              setState(() {
-                audioSource = DeviceFileSource(result.paths.first!);
-                audioName = result.names.first;
-              });
-            }
-          },
-        ),
+      EditableElementListTile(
+        title: "Current alarm:",
+        onPressed: () async {
+          FilePickerResult? result =
+              await FilePicker.platform.pickFiles(type: FileType.audio);
+          if (result != null) {
+            setState(() {
+              audioSource = DeviceFileSource(result.paths.first!);
+              audioName = result.names.first;
+            });
+          }
+        },
+        value: audioName,
       ),
       Padding(
         padding: const EdgeInsets.all(16.0),
@@ -156,13 +162,77 @@ class _ConnectedRobotMenuState extends State<ConnectedRobotMenu>
         "Other info",
         textAlign: TextAlign.center,
       )),
-      Padding(padding: EdgeInsets.symmetric(vertical: 32.0)),
+      //Padding(padding: EdgeInsets.symmetric(vertical: 32.0)),
+      EditableElementListTile(
+        title: "Current robot name:",
+        onPressed: () async {
+          await showDialog(
+            context: context,
+            builder: (context) => SimpleDialog(
+              children: [
+                Text(
+                  "Enter a new name",
+                  textAlign: TextAlign.center,
+                  style: b1,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(labelText: "new name:"),
+                      onChanged: (newValue) {
+                        setState(() {
+                          name = newValue;
+                          print("$newValue here");
+                        });
+                      }),
+                ),
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Change"))
+              ],
+            ),
+          ).then((value) => setState(() {
+                name = value ?? name;
+                print("$value here");
+              }));
+        },
+        value: name,
+      ),
       Divider(),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 64.0),
         child: ElevatedButton(
           onPressed: () {
-            widget.onForget(widget.device.address);
+            showDialog(
+                context: context,
+                builder: (context) => SimpleDialog(
+                      children: [
+                        Text(
+                          "Really forget it?",
+                          textAlign: TextAlign.center,
+                          style: b1,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text("No")),
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  widget.onForget(widget.device.address);
+                                },
+                                child: Text("Yes")),
+                          ],
+                        )
+                      ],
+                    ));
           },
           child: Text("Forget"),
           style: ElevatedButton.styleFrom(primary: Colors.red),
@@ -176,4 +246,28 @@ class _ConnectedRobotMenuState extends State<ConnectedRobotMenu>
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class EditableElementListTile extends StatelessWidget {
+  final value;
+  final void Function() onPressed;
+  final String title;
+  const EditableElementListTile(
+      {required this.title,
+      required this.value,
+      required this.onPressed,
+      Key? key})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(title),
+      subtitle: Text("${value ?? "Musca.mp3"}"),
+      trailing: ElevatedButton(
+        onPressed: onPressed,
+        child: const Text("Change"),
+      ),
+    );
+  }
 }

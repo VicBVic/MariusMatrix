@@ -13,8 +13,10 @@ class MainScaffold extends StatefulWidget {
 }
 
 class _MainScaffoldState extends State<MainScaffold> {
+  int currentPageIndex = 0;
   Set<String> botAdresses = <String>{};
   Future<List<String>>? adressesFromFile;
+  PageController robotPageViewController = PageController();
   @override
   void initState() {
     super.initState();
@@ -35,35 +37,62 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    List<BottomNavigationBarItem> bottomItems = botAdresses
+        .where((element) => element != '')
+        .map((e) => BottomNavigationBarItem(
+              icon: Icon(Icons.computer),
+              label: '',
+              backgroundColor: Colors.blue,
+            ))
+        .toList();
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title ?? ""),
-      ),
-      body: RobotPageView(
-        checkAvalability: true,
-        wantedAdresses: botAdresses,
-        onAdressForgor: (adress) {
-          setState(() {
-            botAdresses.remove(adress);
-            FileManager.instance.updateAdresses(botAdresses.toList());
-          });
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: ((context) => DeviceSelectScreen(
-                usedAdresses: botAdresses,
-                checkActivity: false,
-                onSelected: (device) => setState(() {
-                      botAdresses.add(device.address);
-                      FileManager.instance.updateAdresses(botAdresses.toList());
-                    }))),
-          ),
+        appBar: AppBar(
+          title: Text(widget.title ?? ""),
         ),
-        child: const Icon(Icons.add),
-      ),
-    );
+        body: RobotPageView(
+          onChangedScreen: (index) {
+            setState(() {
+              currentPageIndex = index;
+            });
+          },
+          controller: robotPageViewController,
+          checkAvalability: true,
+          wantedAdresses: botAdresses,
+          onAdressForgor: (adress) {
+            setState(() {
+              botAdresses.remove(adress);
+              FileManager.instance.updateAdresses(botAdresses.toList());
+            });
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: ((context) => DeviceSelectScreen(
+                  usedAdresses: botAdresses,
+                  checkActivity: false,
+                  onSelected: (device) => setState(() {
+                        botAdresses.add(device.address);
+                        FileManager.instance
+                            .updateAdresses(botAdresses.toList());
+                      }))),
+            ),
+          ),
+          child: const Icon(Icons.add),
+        ),
+        bottomNavigationBar: bottomItems.length < 2
+            ? null
+            : BottomNavigationBar(
+                items: bottomItems,
+                currentIndex: currentPageIndex,
+                onTap: (index) {
+                  setState(() {
+                    currentPageIndex = index;
+                    robotPageViewController.jumpToPage(index);
+                  });
+                },
+              ));
   }
 }
