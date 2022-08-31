@@ -10,8 +10,8 @@ class MissingMenu extends StatelessWidget {
     return const Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
-        child:
-            Text("no bot connected, use the button below to add a connection."),
+        child: Text(
+            "No bot connected, make sure your robots is paired with your device in the settings using the button below."),
       ),
     );
   }

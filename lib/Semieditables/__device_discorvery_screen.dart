@@ -45,21 +45,26 @@ class _DeviceDiscoveryScreenState extends State<DeviceDiscoveryScreen> {
   }
 
   void startDiscovery() {
+    print(results);
     _streamSubscription =
         FlutterBluetoothSerial.instance.startDiscovery().listen((event) {
-      if (event.device.type == BluetoothDeviceType)
+      if (event.device.type == BluetoothDeviceType.classic)
         setState(() {
           final deviceIndex = results.indexWhere(
               (element) => event.device.address == element.device.address);
+          print(deviceIndex);
           if (deviceIndex >= 0)
             results[deviceIndex] = event;
-          else
+          else {
             results.add(event);
+            print("yes added");
+          }
         });
     });
 
     _streamSubscription!.onDone(() {
       setState(() {
+        print("dope");
         isDiscovering = false;
       });
     });
@@ -68,21 +73,24 @@ class _DeviceDiscoveryScreenState extends State<DeviceDiscoveryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(actions: [
-        isDiscovering
-            ? FittedBox(
-                child: Container(
-                  margin: new EdgeInsets.all(16.0),
-                  child: const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
-              )
-            : IconButton(
-                icon: Icon(Icons.replay),
-                onPressed: restartDiscovery,
-              )
-      ]),
+      appBar: AppBar(
+          title: Text(
+              isDiscovering ? "Discovering devices..." : "Discovered devices"),
+          actions: [
+            isDiscovering
+                ? FittedBox(
+                    child: Container(
+                      margin: new EdgeInsets.all(16.0),
+                      child: const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                  )
+                : IconButton(
+                    icon: Icon(Icons.replay),
+                    onPressed: restartDiscovery,
+                  )
+          ]),
       body: Column(
         children: results
             .map(

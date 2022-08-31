@@ -28,7 +28,7 @@ class _MenuPopupState extends State<MenuPopup> {
       return ListTile(
         title: Text(widget.elements[index]),
         trailing: Radio(
-          groupValue: widget.elements[index],
+          groupValue: widget.currentItem,
           value: widget.elements[index],
           onChanged: (dynamic value) => onItemChanged(value),
         ),

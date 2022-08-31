@@ -5,9 +5,13 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 class DeviceSelectScreen extends StatefulWidget {
   final bool checkActivity;
+  final Set<String> usedAdresses;
   final void Function(BluetoothDevice) onSelected;
   const DeviceSelectScreen(
-      {Key? key, required this.checkActivity, required this.onSelected})
+      {Key? key,
+      required this.checkActivity,
+      required this.onSelected,
+      required this.usedAdresses})
       : super(key: key);
 
   @override
@@ -30,15 +34,20 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> list = devices
-        .map((e) => ListTile(
-              title: Text(e.name ?? "Missingno"),
-              onTap: () {
+    List<Widget> list = devices.map((e) {
+      bool used = widget.usedAdresses.contains(e.address);
+      return ListTile(
+        trailing: used ? Icon(Icons.check) : null,
+        title: Text(e.name ?? "Missingno"),
+        leading: null,
+        onTap: used
+            ? null
+            : () {
                 Navigator.pop(context);
                 widget.onSelected(e);
               },
-            ))
-        .toList();
+      );
+    }).toList();
     return Scaffold(
       appBar: AppBar(
         title: Text('Choose a device:'),
