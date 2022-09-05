@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_application_1/Editables/popup_menu.dart';
 import 'package:flutter_application_1/Semieditables/loaded_menu.dart';
 import 'package:flutter_application_1/Semieditables/unloaded_menu.dart';
+import 'package:flutter_application_1/util/blue_broadcast_handler.dart';
+import 'package:flutter_application_1/util/connection_to_commands.dart';
 import 'package:flutter_application_1/util/get_bot_info.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import '../Editables/menu_button.dart';
@@ -28,46 +30,32 @@ class RobotMenu extends StatefulWidget {
 
 class _RobotMenuState extends State<RobotMenu>
     with AutomaticKeepAliveClientMixin<RobotMenu> {
-  BluetoothConnection? botConnection;
   BotInfo? botInfo;
+  bool hasError = false;
   bool connected = false;
-
-  void updateConnection(BluetoothConnection connection) async {
-    print("connection $connection");
-    setState(() {
-      connected = true;
-      botConnection = connection;
-    });
-    if (connection == null)
-      throw ("Falied to connect, disconnected remotely! Maybe cuz an instance of connection was not disposed before, idk");
-    BotInfo buffer = await getConnectionBotInfo(connection);
-    setState(() {
-      botInfo = buffer;
-    });
-    if (botInfo == null) throw ("Failed to fetch bot info, idk why");
-  }
 
   @override
   void initState() {
-    Future getConnection;
-    getConnection = BluetoothConnection.toAddress(widget.device.address);
-    getConnection.onError((error, stackTrace) {
-      print(error);
-      setState(() {
-        connected = true;
-        botConnection = null;
-      });
-      return BluetoothConnection.toAddress(widget.device.address);
-    }).then((connection) => updateConnection(connection));
-
-    getConnection.then((connection) => updateConnection(connection));
-
     super.initState();
+    connect().then((v) => fetch());
+  }
+
+  Future<void> connect() async {
+    await BlueBroadcastHandler.instance.addAddress(widget.device.address);
+    setState(() {
+      connected = true;
+    });
+  }
+
+  Future<void> fetch() async {
+    BotInfo buffer = await getAddressInfo(widget.device.address);
+    setState(() {
+      botInfo = buffer;
+    });
   }
 
   @override
   void dispose() {
-    botConnection?.dispose();
     // TODO: implement dispose
     super.dispose();
   }
@@ -79,7 +67,7 @@ class _RobotMenuState extends State<RobotMenu>
       headline =
           "Connecting to ${widget.device.name ?? widget.device.address}...";
     } else {
-      if (botConnection != null) {
+      if (!hasError) {
         headline =
             "Fetching info from ${widget.device.name ?? widget.device.address}...";
       } else {

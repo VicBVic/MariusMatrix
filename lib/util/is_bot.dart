@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_application_1/util/blue_broadcast_handler.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -10,23 +11,19 @@ import 'connection_to_commands.dart';
 const String detectionString = "r u a bot?\n";
 const String validConnectionString = "yes i am bot\n";
 
-Future<bool> isBotTest(BluetoothConnection connection, Duration timeout) async {
-  connection.output.add(Uint8List.fromList(ascii.encode(detectionString)));
-
+Future<bool> isBotTest(String address) async {
   print("entered isBotTest body");
+  await BlueBroadcastHandler.instance.addAddress(address);
 
+  BlueBroadcastHandler.instance.printMessage(address, detectionString);
   print("added detection message");
 
-  Stream<String> commands =
-      bluetoothConnectionReceivedCommands(connection).asBroadcastStream();
-
-  await for (final command in commands) {
+  await for (final command
+      in BlueBroadcastHandler.instance.getCommandStream(address)!) {
     print("found command $command ${command == validConnectionString}");
     if (command == validConnectionString) {
-      //commands.drain();
       return true;
     }
   }
-  //commands.drain();
   return false;
 }

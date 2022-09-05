@@ -43,55 +43,7 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen> {
         trailing: used ? Icon(Icons.check) : null,
         title: Text(e.name ?? "Missingno"),
         leading: null,
-        onTap: used
-            ? null
-            : () async {
-                BluetoothConnection? connection = await showDialog(
-                    barrierDismissible: false,
-                    context: context,
-                    builder: (context) => FutureBuilder(
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              Navigator.of(context).pop(snapshot.data);
-                            }
-                            return SimpleDialog(
-                              title: Text("Waiting for connection..."),
-                              titlePadding: EdgeInsets.all(32.0),
-                              children: [
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text("Cancel"))
-                              ],
-                            );
-                          },
-                          future: BluetoothConnection.toAddress(e.address),
-                        ));
-                if (connection == null) return;
-                bool? isBot = await showDialog(
-                    barrierDismissible: false,
-                    context: context,
-                    builder: (context) {
-                      return ConnectingToBotDialog(
-                        address: e.address,
-                        isAddressBot: () async {
-                          bool ans = await isBotTest(
-                              connection, widget.connectionTimeLimit);
-                          print("found $ans");
-                          return ans;
-                        }(),
-                      );
-                    });
-                connection.dispose();
-                if (isBot ?? false) {
-                  widget.onSelected(e);
-                  Navigator.pop(context);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Error when connecting!")));
-                }
-              },
+        onTap: used ? null : () async {},
       );
     }).toList();
     return Scaffold(

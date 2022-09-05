@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter_application_1/util/blue_broadcast_handler.dart';
 import 'package:flutter_application_1/util/connection_to_commands.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
@@ -34,15 +36,15 @@ const Duration rerequestTime = Duration(seconds: 10);
 
 const String getInfoCommand = "gib me ur info\n";
 
-Future<BotInfo> getConnectionBotInfo(BluetoothConnection connection) async {
-  connection.output.add(Uint8List.fromList(ascii.encode(getInfoCommand)));
+Future<BotInfo> getAddressInfo(String address) async {
+  await BlueBroadcastHandler.instance.addAddress(address);
 
-  Stream<String> commands =
-      bluetoothConnectionReceivedCommands(connection).asBroadcastStream();
+  BlueBroadcastHandler.instance.printMessage(address, getInfoCommand);
 
   BotInfo result = BotInfo.empty();
 
-  await for (final command in commands) {
+  await for (final command
+      in BlueBroadcastHandler.instance.getCommandStream(address)!) {
     result.parseString(command);
     if (result.name != null && result.isActive != null) return result;
   }
