@@ -4,22 +4,25 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../Editables/menu_button.dart';
 
-class DisconnectedRobotMenu extends StatefulWidget {
+class UnloadedMenu extends StatefulWidget {
   final double displayImageHeight = 300;
-  final String adress;
   final String robotPhotoPath = 'assets/arduino_STOCK.png';
-  final String? robotName;
+  final String headline;
+  final String address;
   final void Function(String adress) onForget;
-  const DisconnectedRobotMenu(
-      {this.robotName, required this.adress, Key? key, required this.onForget})
+  const UnloadedMenu(
+      {Key? key,
+      required this.onForget,
+      required this.headline,
+      required this.address})
       : super(key: key);
 
   @override
-  State<DisconnectedRobotMenu> createState() => _DisconnectedRobotMenuState();
+  State<UnloadedMenu> createState() => _UnloadedMenuState();
 }
 
-class _DisconnectedRobotMenuState extends State<DisconnectedRobotMenu>
-    with AutomaticKeepAliveClientMixin<DisconnectedRobotMenu> {
+class _UnloadedMenuState extends State<UnloadedMenu>
+    with AutomaticKeepAliveClientMixin<UnloadedMenu> {
   bool isActive = false;
   bool isManual = true;
   TimeOfDay scheduledStart = TimeOfDay(hour: 0, minute: 0);
@@ -33,7 +36,7 @@ class _DisconnectedRobotMenuState extends State<DisconnectedRobotMenu>
       Padding(
         padding: const EdgeInsets.all(32.0),
         child: Text(
-          'Trying to connect to adress ${widget.adress}...',
+          widget.headline,
           style: headline,
           textAlign: TextAlign.center,
         ),
@@ -58,7 +61,7 @@ class _DisconnectedRobotMenuState extends State<DisconnectedRobotMenu>
       ),
       ElevatedButton(
         onPressed: () {
-          widget.onForget(widget.adress);
+          widget.onForget(widget.address);
         },
         child: Text("Forget"),
         style: ElevatedButton.styleFrom(primary: Colors.red),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Semieditables/__device_discorvery_screen.dart';
-import 'package:flutter_application_1/Semieditables/__device_select_screen.dart';
+import 'package:flutter_application_1/Semieditables/device_select_screen.dart';
 import 'package:flutter_application_1/file_manager.dart';
 import 'robot_page_view.dart';
 
@@ -71,6 +71,7 @@ class _MainScaffoldState extends State<MainScaffold> {
             context,
             MaterialPageRoute(
               builder: ((context) => DeviceSelectScreen(
+                  connectionTimeLimit: Duration(seconds: 10),
                   usedAdresses: botAdresses,
                   checkActivity: false,
                   onSelected: (device) => setState(() {

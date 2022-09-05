@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/Semieditables/disconnected_robot_menu.dart';
-import 'package:flutter_application_1/Semieditables/missing_menu.dart';
+import 'package:flutter_application_1/Semieditables/unloaded_menu.dart';
+import 'package:flutter_application_1/Semieditables/unloaded_menu.dart';
 import 'package:flutter_application_1/file_manager.dart';
+import 'package:flutter_application_1/util/get_bot_info.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'Semieditables/no_robots_menu.dart';
 import 'Semieditables/robot_menu.dart';
 
 enum _DeviceAvailability {
@@ -97,7 +99,7 @@ class _RobotPageViewState extends State<RobotPageView> {
         .toList();
 
     if (nonNullAdresses.isEmpty) {
-      return MissingMenu();
+      return NoRobotsMenu();
     }
 
     return PageView(
@@ -108,16 +110,17 @@ class _RobotPageViewState extends State<RobotPageView> {
           int deviceIndex = bondedDevices
               .indexWhere((element) => adress == element.device.address);
           if (deviceIndex >= 0) {
-            return ConnectedRobotMenu(
+            return RobotMenu(
               device: bondedDevices[deviceIndex].device,
-              robotName: bondedDevices[deviceIndex].device.name,
+              info: BotInfo(false, bondedDevices[deviceIndex].device.name),
               onForget: widget.onAdressForgor,
             );
           }
 
-          return DisconnectedRobotMenu(
-            adress: adress,
+          return UnloadedMenu(
+            address: adress,
             onForget: widget.onAdressForgor,
+            headline: 'Trying to connect to $adress',
           );
         },
       ).toList(),

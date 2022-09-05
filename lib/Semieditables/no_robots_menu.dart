@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/Editables/popup_menu.dart';
 import '../Editables/menu_button.dart';
 
-class MissingMenu extends StatelessWidget {
-  const MissingMenu({Key? key}) : super(key: key);
+class NoRobotsMenu extends StatelessWidget {
+  const NoRobotsMenu({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
