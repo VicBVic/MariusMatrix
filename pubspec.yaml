@@ -39,6 +39,8 @@ dependencies:
   loading_animation_widget: ^1.2.0+2
   file_picker: ^5.0.1
   audioplayers: ^1.0.1
+  permission_handler: ^10.0.0
+  flutter_local_notifications: ^9.9.1
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +67,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/arduino_STOCK.png
+    - assets/Marius.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

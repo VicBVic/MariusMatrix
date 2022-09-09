@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/Semieditables/no_bluetooth_menu.dart';
+import 'package:flutter_application_1/bluetooth/alert_manager.dart';
+import 'package:flutter_application_1/error_menus/no_bluetooth_menu.dart';
+import 'package:flutter_application_1/popup_screens/alert_screen.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'main_scaffold.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'main_widgets/main_scaffold.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,16 +18,23 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Future<bool?> blueRequest = FlutterBluetoothSerial.instance.requestEnable();
+  Future<bool> blueRequest =
+      FlutterBluetoothSerial.instance.requestEnable().then((value) {
+    if (value == null || !value) return false;
+    return Permission.location.request().isGranted;
+  });
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        darkTheme: ThemeData(
-          brightness: Brightness.light,
           primarySwatch: Colors.blue,
         ),
         //hemeMode: ThemeMode.dark,
@@ -40,8 +50,12 @@ class _MyAppState extends State<MyApp> {
               return NoBluetoothMenu(
                 onRetry: () {
                   setState(() {
-                    blueRequest =
-                        FlutterBluetoothSerial.instance.requestEnable();
+                    blueRequest = FlutterBluetoothSerial.instance
+                        .requestEnable()
+                        .then((value) {
+                      if (value == null || !value) return false;
+                      return Permission.location.request().isGranted;
+                    });
                   });
                 },
               );
