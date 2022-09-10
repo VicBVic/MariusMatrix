@@ -6,7 +6,7 @@ Stream<String> bluetoothConnectionReceivedCommands(
     BluetoothConnection connection) async* {
   String buffer = "";
   await for (final data in connection.input!.asBroadcastStream()) {
-    String received = utf8.decode(data);
+    String received = utf8.decode(data, allowMalformed: true);
     for (var a in received.split('')) {
       buffer += a;
       if (a == '\n') {

@@ -5,12 +5,23 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter_application_1/Bluetooth/blue_broadcast_handler.dart';
 import 'package:flutter_application_1/bluetooth/alert_manager.dart';
+import 'package:flutter_application_1/bluetooth/blue_broadcast_handler.dart';
 import 'package:flutter_application_1/bluetooth/get_bot_info.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../popup_screens/alert_screen.dart';
+
+const String untriggerCommand = "Untrigger\n";
+
+const int musicFileNamesLen = 4;
+const Map<int, String> musicFileNames = {
+  0: "muzica",
+  1: "muzichie",
+  2: "descalta-te",
+  3: "jandarmeria"
+};
 
 class LoadedMenu extends StatefulWidget {
   final BotInfo info;
@@ -35,6 +46,8 @@ class _LoadedMenuState extends State<LoadedMenu> {
   bool isAudioPlaying = false;
   late BotInfo info;
   late StreamSubscription<String> alertSubscription;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   @override
   void initState() {
     // TODO: implement initState
@@ -42,12 +55,29 @@ class _LoadedMenuState extends State<LoadedMenu> {
     alertSubscription = BlueBroadcastHandler.instance
         .getAlertStream(widget.device.address,
             info.name == null || info.name == '' ? " Noname" : info.name!)
-        .listen((name) {
+        .listen((name) async {
       print("foundYa");
-      Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => AlertScreen(botName: name)));
+      await Navigator.of(context)
+          .push(MaterialPageRoute(
+              builder: (context) => AlertScreen(botName: name)))
+          .then((value) async {
+        const AndroidNotificationDetails androidPlatformChannelSpecifics =
+            AndroidNotificationDetails('your channel id', 'your channel name',
+                channelDescription: 'your channel description',
+                importance: Importance.max,
+                priority: Priority.high,
+                ticker: 'ticker');
+        const NotificationDetails platformChannelSpecifics =
+            NotificationDetails(android: androidPlatformChannelSpecifics);
+        await flutterLocalNotificationsPlugin.show(
+            0, 'plain title', 'plain body', platformChannelSpecifics,
+            payload: 'item x');
+        super.initState();
+        return;
+      });
+      BlueBroadcastHandler.instance
+          .printMessage(widget.device.address, untriggerCommand);
     });
-    super.initState();
   }
 
   @override
@@ -165,26 +195,41 @@ class _LoadedMenuState extends State<LoadedMenu> {
       EditableElementListTile(
         title: "Current alarm:",
         onPressed: () async {
-          FilePickerResult? result =
-              await FilePicker.platform.pickFiles(type: FileType.audio);
-          if (result != null) {
+          int? index = await showDialog(
+              context: context,
+              builder: (context) => SimpleDialog(
+                    title: Text("Choose an alarm:"),
+                    children: musicFileNames
+                        .map<int, Widget>((index, name) => MapEntry(
+                            index,
+                            ListTile(
+                                title: Text(name),
+                                trailing: Radio(
+                                  groupValue: info.musicFileName,
+                                  value: name,
+                                  onChanged: (name) {
+                                    Navigator.pop(context, index);
+                                  },
+                                ))))
+                        .values
+                        .toList(),
+                  ));
+          if (index != null)
             setState(() {
-              //audioSource = DeviceFileSource(result.paths.first!);
-              audioName = result.names.first;
+              info.musicFileName = musicFileNames[index];
+              BlueBroadcastHandler.instance.printMessage(
+                  widget.device.address, "currentAlarmIndex:$index\n");
             });
-          }
         },
         value: audioName,
       ),
       Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
-            onPressed: () async {
+            onPressed: () {
               setState(() {
-                isAudioPlaying = !isAudioPlaying;
-                /*isAudioPlaying
-                    ? player.play(audioSource!)
-                    : player.setVolume(0.0);*/
+                BlueBroadcastHandler.instance
+                    .printMessage(widget.device.address, "alert dummy\n");
               });
             },
             child: Text(isAudioPlaying ? "Stop" : "Test")),

@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'package:async/async.dart';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -13,6 +13,7 @@ import 'package:flutter_application_1/Bluetooth/connection_to_commands.dart';
 import 'package:flutter_application_1/bluetooth/get_bot_info.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import '../extra_widgets/menu_button.dart';
+
 
 class RobotMenu extends StatefulWidget {
   final void Function(String adress) onForget;
@@ -30,6 +31,7 @@ class RobotMenu extends StatefulWidget {
 
 class _RobotMenuState extends State<RobotMenu>
     with AutomaticKeepAliveClientMixin<RobotMenu> {
+  late CancelableOperation connectFetchOperation;
   BotInfo? botInfo;
   bool hasError = false;
   bool connected = false;
@@ -37,7 +39,22 @@ class _RobotMenuState extends State<RobotMenu>
   @override
   void initState() {
     super.initState();
-    connect().then((v) => fetch());
+    tryConnect();
+  }
+
+  void tryConnect() async {
+    connectFetchOperation = CancelableOperation.fromFuture(
+        connect().then((v) => fetch()),
+        onCancel: () => print("robotMenuState gata Vere m-om oprit"));
+  }
+
+  void retryConnect() async {
+    setState(() {
+      connectFetchOperation.cancel();
+      connected = false;
+      botInfo = null;
+      tryConnect();
+    });
   }
 
   Future<void> connect() async {
@@ -77,6 +94,7 @@ class _RobotMenuState extends State<RobotMenu>
     }
     if (botInfo == null) {
       return UnloadedMenu(
+          onRetry: retryConnect,
           onForget: widget.onForget,
           headline: headline,
           address: widget.device.address);

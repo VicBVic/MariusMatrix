@@ -9,12 +9,14 @@ class UnloadedMenu extends StatefulWidget {
   final String robotPhotoPath = 'assets/arduino_STOCK.png';
   final String headline;
   final String address;
+  final void Function() onRetry;
   final void Function(String adress) onForget;
   const UnloadedMenu(
       {Key? key,
       required this.onForget,
       required this.headline,
-      required this.address})
+      required this.address,
+      required this.onRetry})
       : super(key: key);
 
   @override
@@ -50,7 +52,17 @@ class _UnloadedMenuState extends State<UnloadedMenu>
       ),
       //Divider(),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 64.0, vertical: 64.0),
+        padding: const EdgeInsets.fromLTRB(32.0, 64.0, 32.0, 0.0),
+        child: ElevatedButton(
+          onPressed: () {
+            widget.onRetry();
+          },
+          child: Text("Retry"),
+          style: ElevatedButton.styleFrom(primary: Colors.blue),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(32.0, 0.0, 32.0, 0.0),
         child: ElevatedButton(
           onPressed: () {
             showDialog(

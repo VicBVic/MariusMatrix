@@ -13,23 +13,51 @@ class BlueBroadcastHandler {
   factory BlueBroadcastHandler() {
     return instance;
   }
+  final int maxConnectionRetries = 2;
+
+  Set<BluetoothDevice> bondedDevices = <BluetoothDevice>{};
+
+  Future<BluetoothConnection> getConnectionToAdress(String address,
+      {int retries = 0}) async {
+    if (retries > 2) throw ("fruie coate");
+    BluetoothConnection result =
+        await BluetoothConnection.toAddress(address).then(
+      (connection) {
+        print("connected $address!");
+        return connection;
+      },
+    ).onError((error, stackTrace) async {
+      print("cuie frate $address");
+      return await getConnectionToAdress(address, retries: retries + 1);
+    });
+    return result;
+  }
+
+  Future<void> addBondedDeviceListener() async {
+    await FlutterBluetoothSerial.instance
+        .getBondedDevices()
+        .then((avalibleDevices) {
+      bondedDevices.addAll(avalibleDevices);
+    });
+    print("blueBroadcastHandler gata tati");
+    for (BluetoothDevice b in bondedDevices) {
+      print(b.address);
+    }
+  }
 
   Future<bool> addAddress(String address) async {
     print("Entered addAdress body");
     if (_addressToConnection.containsKey(address) &&
-        _addressToConnection[address]!.isConnected) return false;
+        _addressToConnection[address]!.isConnected) return true;
     print("Entered addAdress body");
 
-    await BluetoothConnection.toAddress(address).then(
-      (connection) {
-        print("connected $address!");
-        return _addressToConnection[address] = connection;
-      },
-    ).onError((error, stackTrace) async {
-      print("cuie frate");
-      return _addressToConnection[address] =
-          await BluetoothConnection.toAddress(address);
-    });
+    try {
+      _addressToConnection[address] = await getConnectionToAdress(address);
+    } catch (e) {
+      print(e);
+      return false;
+    }
+
     var connection = _addressToConnection[address]!;
     _connectionToCommandStream[connection] =
         bluetoothConnectionReceivedCommands(connection).asBroadcastStream();

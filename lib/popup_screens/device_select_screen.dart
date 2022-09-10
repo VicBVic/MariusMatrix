@@ -45,6 +45,7 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen> {
       return ListTile(
           trailing: used ? const Icon(Icons.check) : null,
           title: Text(e.name ?? "Missingno"),
+          subtitle: Text(e.address),
           leading: null,
           onTap: used
               ? null
@@ -140,7 +141,7 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen> {
       appBar: AppBar(
         title: const Text('Choose a device:'),
       ),
-      body: Column(
+      body: ListView(
         children: list,
       ),
     );

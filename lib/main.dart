@@ -4,6 +4,7 @@ import 'package:flutter_application_1/error_menus/no_bluetooth_menu.dart';
 import 'package:flutter_application_1/popup_screens/alert_screen.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'main_widgets/main_scaffold.dart';
 
 void main() {
@@ -22,6 +23,17 @@ class _MyAppState extends State<MyApp> {
       FlutterBluetoothSerial.instance.requestEnable().then((value) {
     if (value == null || !value) return false;
     return Permission.location.request().isGranted;
+  }).then((value) async {
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
+    if (value as bool) {
+      return await flutterLocalNotificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                  AndroidFlutterLocalNotificationsPlugin>()
+              ?.requestPermission() ??
+          false;
+    } else
+      return false;
   });
 
   @override

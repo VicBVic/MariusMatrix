@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/bluetooth/blue_broadcast_handler.dart';
 import 'package:flutter_application_1/robot_menus/unloaded_menu.dart';
 import 'package:flutter_application_1/robot_menus/unloaded_menu.dart';
 import 'package:flutter_application_1/file_access/file_manager.dart';
@@ -13,14 +14,6 @@ enum _DeviceAvailability {
   no,
   maybe,
   yes,
-}
-
-class _DeviceWithAvailability {
-  BluetoothDevice device;
-  _DeviceAvailability availability;
-  int? rssi;
-
-  _DeviceWithAvailability(this.device, this.availability, [this.rssi]);
 }
 
 class RobotPageView extends StatefulWidget {
@@ -44,50 +37,28 @@ class RobotPageView extends StatefulWidget {
 }
 
 class _RobotPageViewState extends State<RobotPageView> {
-  List<_DeviceWithAvailability> bondedDevices =
-      List<_DeviceWithAvailability>.empty(growable: true);
-  List<_DeviceWithAvailability> wantedDevices =
-      List<_DeviceWithAvailability>.empty(growable: true);
-  StreamSubscription<BluetoothDiscoveryResult>? _streamSubscription;
-  bool isDiscovering = false;
+  List<String> wantedAdresses = List.empty(growable: true);
   @override
   initState() {
-    isDiscovering = widget.checkAvalability;
-    if (isDiscovering) {
-      _startDiscovery();
-    }
-
-    FlutterBluetoothSerial.instance
-        .getBondedDevices()
-        .then((avalibleDevices) => setState(() {
-              bondedDevices = avalibleDevices.map((device) {
-                return _DeviceWithAvailability(
-                    device,
-                    widget.checkAvalability
-                        ? _DeviceAvailability.maybe
-                        : _DeviceAvailability.no);
-              }).toList();
-            }));
-
-    _streamSubscription!.onDone(() {
+    BlueBroadcastHandler.instance
+        .addBondedDeviceListener()
+        .then((value) => setState(() {}));
+    FileManager.instance.getBotAdresses().then((value) {
       setState(() {
-        isDiscovering = false;
+        wantedAdresses.addAll(value);
       });
-    });
-  }
-
-  void _startDiscovery() {
-    _streamSubscription =
-        FlutterBluetoothSerial.instance.startDiscovery().listen((event) {
-      final index = bondedDevices.indexWhere(
-          (element) => event.device.address == element.device.address);
     });
   }
 
   @override
   void dispose() {
-    _streamSubscription?.cancel();
     super.dispose();
+  }
+
+  void retry() async {
+    BlueBroadcastHandler.instance
+        .addBondedDeviceListener()
+        .then((value) => setState(() {}));
   }
 
   @override
@@ -106,20 +77,27 @@ class _RobotPageViewState extends State<RobotPageView> {
       controller: widget.controller,
       children: nonNullAdresses.map(
         (adress) {
-          int deviceIndex = bondedDevices
-              .indexWhere((element) => adress == element.device.address);
-          if (deviceIndex >= 0) {
+          BluetoothDevice? deviceOfAdress;
+          try {
+            deviceOfAdress = BlueBroadcastHandler.instance.bondedDevices
+                .firstWhere((element) => adress == element.address);
+          } catch (e) {
+            print("robotPageView cuie $e");
+            deviceOfAdress = null;
+          }
+          if (deviceOfAdress != null) {
             return RobotMenu(
-              device: bondedDevices[deviceIndex].device,
-              info: BotInfo(false, bondedDevices[deviceIndex].device.name),
+              device: deviceOfAdress,
+              info: BotInfo(false, deviceOfAdress.name),
               onForget: widget.onAdressForgor,
             );
           }
 
           return UnloadedMenu(
+            onRetry: retry,
             address: adress,
             onForget: widget.onAdressForgor,
-            headline: 'Trying to connect to $adress',
+            headline: 'Trying to find bonded device with adress $adress...',
           );
         },
       ).toList(),
