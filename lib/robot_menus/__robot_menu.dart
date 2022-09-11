@@ -1,4 +1,4 @@
-import 'package:async/async.dart';
+/*import 'package:async/async.dart';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -10,10 +10,9 @@ import 'package:flutter_application_1/robot_menus/loaded_menu.dart';
 import 'package:flutter_application_1/robot_menus/unloaded_menu.dart';
 import 'package:flutter_application_1/Bluetooth/blue_broadcast_handler.dart';
 import 'package:flutter_application_1/Bluetooth/connection_to_commands.dart';
-import 'package:flutter_application_1/bluetooth/get_bot_info.dart';
+import 'package:flutter_application_1/bluetooth/bot_info.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import '../extra_widgets/menu_button.dart';
-
 
 class RobotMenu extends StatefulWidget {
   final void Function(String adress) onForget;
@@ -105,4 +104,4 @@ class _RobotMenuState extends State<RobotMenu>
 
   @override
   bool get wantKeepAlive => true;
-}
+}*/
