@@ -1,12 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_application_1/Bluetooth/blue_broadcast_handler.dart';
-import 'package:flutter_application_1/Bluetooth/connection_to_commands.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-
 class BotInfo {
   bool? isActive, isManual;
   String? name, musicFileName;
@@ -57,21 +48,18 @@ class BotInfo {
   }
 }
 
-const Duration rerequestTime = Duration(seconds: 10);
-
-const String getInfoCommand = "gib me ur info\n";
-
-Future<BotInfo> getAddressInfo(String address) async {
-  await BlueBroadcastHandler.instance.addAddress(address);
-
-  BlueBroadcastHandler.instance.printMessage(address, getInfoCommand);
-
-  BotInfo result = BotInfo.empty();
-
-  await for (final command
-      in await BlueBroadcastHandler.instance.getCommandStream(address)) {
-    result.parseString(command);
-    if (result.isComplete()) return result;
+class CompleteBotInfo {
+  late bool isActive, isManual;
+  late String name, musicFileName;
+  late int startTimeMinutes, endTimeMinutes;
+  CompleteBotInfo.fromBotInfo(BotInfo? info) {
+    if (info == null || !info.isComplete())
+      throw ("Info is incomplete or null.");
+    isActive = info.isActive!;
+    isManual = info.isManual!;
+    name = info.name!;
+    musicFileName = info.musicFileName!;
+    startTimeMinutes = info.startTimeMinutes!;
+    endTimeMinutes = info.endTimeMinutes!;
   }
-  return result;
 }

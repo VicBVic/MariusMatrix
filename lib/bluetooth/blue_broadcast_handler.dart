@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_application_1/bluetooth/alert_manager.dart';
-import 'package:flutter_application_1/bluetooth/connection_to_commands.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
+import 'bot_info.dart';
+
 class BlueBroadcastHandler {
-  Map<String, BluetoothConnection> _addressToConnection = {};
-  Map<BluetoothConnection, Stream<String>> _connectionToCommandStream = {};
+  Map<String, BluetoothConnection> _connectionBuffer = {};
+  Map<BluetoothConnection, StreamController<String>> _commandStreamBuffer = {};
 
   static final BlueBroadcastHandler instance = BlueBroadcastHandler._internal();
 
@@ -19,11 +21,16 @@ class BlueBroadcastHandler {
 
   Future<BluetoothConnection> getConnectionToAdress(String address,
       {int retries = 0}) async {
-    if (retries > 2) throw ("fruie coate");
+    if (_connectionBuffer.containsKey(address))
+      return _connectionBuffer[address]!;
+
+    if (retries > 2) throw ("Cannot connect to address $address.");
+
     BluetoothConnection result =
         await BluetoothConnection.toAddress(address).then(
       (connection) {
         print("connected $address!");
+        _connectionBuffer[address] = connection;
         return connection;
       },
     ).onError((error, stackTrace) async {
@@ -39,49 +46,41 @@ class BlueBroadcastHandler {
         .then((avalibleDevices) {
       bondedDevices.addAll(avalibleDevices);
     });
-    print("blueBroadcastHandler gata tati");
-    for (BluetoothDevice b in bondedDevices) {
-      print(b.address);
+  }
+
+  StreamController<String> getCommandStreamController(
+      BluetoothConnection connection) {
+    var commandStream = _commandStreamBuffer[connection];
+
+    if (commandStream != null) return commandStream;
+    commandStream = StreamController<String>.broadcast();
+    commandStream.addStream(_bluetoothConnectionReceivedCommands(connection));
+    return commandStream;
+  }
+
+  Stream<String> _bluetoothConnectionReceivedCommands(
+      BluetoothConnection connection) async* {
+    String buffer = "";
+    await for (final data in connection.input!.asBroadcastStream()) {
+      String received = utf8.decode(data, allowMalformed: true);
+      for (var a in received.split('')) {
+        buffer += a;
+        if (a == '\n') {
+          yield buffer;
+          buffer = '';
+        }
+      }
     }
   }
 
-  Future<bool> addAddress(String address) async {
-    print("Entered addAdress body");
-    if (_addressToConnection.containsKey(address) &&
-        _addressToConnection[address]!.isConnected) return true;
-    print("Entered addAdress body");
-
-    try {
-      _addressToConnection[address] = await getConnectionToAdress(address);
-    } catch (e) {
-      print(e);
-      return false;
-    }
-
-    var connection = _addressToConnection[address]!;
-    _connectionToCommandStream[connection] =
-        bluetoothConnectionReceivedCommands(connection).asBroadcastStream();
-
-    print("connected ${_connectionToCommandStream[connection]}");
-    return true;
+  void printMessage(BluetoothConnection connection, String message) async {
+    connection.output.add(ascii.encode(message));
   }
 
-  Future<Stream<String>> getCommandStream(String address) async {
-    await addAddress(address);
-    //print("returned stream ${_connectionToCommandStream[]}");
-    return _connectionToCommandStream[_addressToConnection[address]]!;
-  }
-
-  void printMessage(String address, String message) async {
-    await addAddress(address);
-    _addressToConnection[address]?.output.add(ascii.encode(message));
-  }
-
-  Stream<String> getAlertStream(String address, String name) async* {
-    await addAddress(address);
-
+  Stream<String> getAlertStream(
+      BluetoothConnection connection, String name) async* {
     await for (String command
-        in _connectionToCommandStream[_addressToConnection[address]]!) {
+        in getCommandStreamController(connection).stream) {
       command = command.replaceAll('\n', '');
       command = command.replaceAll('\r', '');
       if (command == "Alert") {
@@ -89,6 +88,34 @@ class BlueBroadcastHandler {
         yield name;
       }
     }
+  }
+
+  final String detectionString = "r u a bot?\n";
+  final String validConnectionString = "yes i am bot\n";
+
+  Future<bool> isBotTest(BluetoothConnection connection) async {
+    printMessage(connection, detectionString);
+
+    await for (final command in getCommandStreamController(connection).stream) {
+      if (command == validConnectionString) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  final String getInfoCommand = "gib me ur info\n";
+
+  Future<BotInfo> getBotInfo(BluetoothConnection connection) async {
+    printMessage(connection, getInfoCommand);
+
+    BotInfo result = BotInfo.empty();
+
+    await for (final command in getCommandStreamController(connection).stream) {
+      result.parseString(command);
+      if (result.isComplete()) return result;
+    }
+    throw ("Stream finished before comleteing result!");
   }
 
   BlueBroadcastHandler._internal();
