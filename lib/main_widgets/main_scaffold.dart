@@ -14,16 +14,40 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold>
     with TickerProviderStateMixin {
+  int currentPageIndex = 0;
+  Set<String> botAdresses = <String>{};
+  Future<List<String>>? adressesFromFile;
+  late TabController robotPageViewController;
+  @override
+  void initState() {
+    super.initState();
+    robotPageViewController = TabController(vsync: this, length: 0);
+    adressesFromFile = FileManager.instance.getBotAdresses();
+    adressesFromFile
+        ?.then((value) => setState(() {
+              botAdresses.addAll(value.where((element) => element != ''));
+              /*botAdresses.add("98:DA");
+              botAdresses.add("98:DC");
+              botAdresses.add("98:DE");
+              botAdresses.add("98:DF");*/
+              robotPageViewController =
+                  TabController(vsync: this, length: botAdresses.length);
+            }))
+        .onError((error, stackTrace) => print("se mai intampla $error"));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    Set<String> botAdresses = <String>{};
     List<Tab> tabItems = botAdresses
         .map((e) => Tab(
               child: Icon(Icons.computer),
             ))
         .toList();
-    TabController robotPageViewController =
-        TabController(length: tabItems.length, vsync: this);
     //robotPageViewController.dispose();
     return Scaffold(
       body: NestedScrollView(
@@ -48,6 +72,14 @@ class _MainScaffoldState extends State<MainScaffold>
           controller: robotPageViewController,
           checkAvalability: true,
           wantedAdresses: botAdresses,
+          onAdressForgor: (adress) {
+            setState(() {
+              botAdresses.remove(adress);
+              FileManager.instance.updateAdresses(botAdresses.toList());
+              robotPageViewController =
+                  TabController(vsync: this, length: botAdresses.length);
+            });
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -55,10 +87,15 @@ class _MainScaffoldState extends State<MainScaffold>
           context,
           MaterialPageRoute(
             builder: ((context) => DeviceSelectScreen(
-                  connectionTimeLimit: Duration(seconds: 10),
-                  usedAdresses: botAdresses,
-                  checkActivity: false,
-                )),
+                connectionTimeLimit: Duration(seconds: 10),
+                usedAdresses: botAdresses,
+                checkActivity: false,
+                onSelected: (device) => setState(() {
+                      botAdresses.add(device.address);
+                      FileManager.instance.updateAdresses(botAdresses.toList());
+                      robotPageViewController = TabController(
+                          vsync: this, length: botAdresses.length);
+                    }))),
           ),
         ),
         child: const Icon(Icons.add),

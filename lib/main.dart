@@ -19,8 +19,22 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool bluetoothConnected = true;
-  bool permissionsGranted = true;
+  Future<bool> blueRequest =
+      FlutterBluetoothSerial.instance.requestEnable().then((value) {
+    if (value == null || !value) return false;
+    return Permission.location.request().isGranted;
+  }).then((value) async {
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
+    if (value as bool) {
+      return await flutterLocalNotificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                  AndroidFlutterLocalNotificationsPlugin>()
+              ?.requestPermission() ??
+          false;
+    } else
+      return false;
+  });
 
   @override
   void initState() {
@@ -37,14 +51,28 @@ class _MyAppState extends State<MyApp> {
         ),
         //hemeMode: ThemeMode.dark,
         debugShowCheckedModeBanner: false,
-        home: () {
-          if (bluetoothConnected && permissionsGranted) {
-            return const MainScaffold(
-              title: "MatrixController",
-            );
-          } else {
-            return NoBluetoothMenu(onRetry: () {});
-          }
-        }());
+        home: FutureBuilder(
+          future: blueRequest,
+          builder: (context, result) {
+            if (result.hasData && result.data == true) {
+              return const MainScaffold(
+                title: "MatrixController",
+              );
+            } else {
+              return NoBluetoothMenu(
+                onRetry: () {
+                  setState(() {
+                    blueRequest = FlutterBluetoothSerial.instance
+                        .requestEnable()
+                        .then((value) {
+                      if (value == null || !value) return false;
+                      return Permission.location.request().isGranted;
+                    });
+                  });
+                },
+              );
+            }
+          },
+        ));
   }
 }
