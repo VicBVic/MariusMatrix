@@ -1,50 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/bluetooth/alert_manager.dart';
 import 'package:flutter_application_1/error_menus/no_bluetooth_menu.dart';
-import 'package:flutter_application_1/popup_screens/alert_screen.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_application_1/redux/bluetooth_reducer.dart';
+import 'package:flutter_application_1/redux/bluetooth_state.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'main_widgets/main_scaffold.dart';
+import 'package:redux/redux.dart';
+
+import 'redux/bluetooth_state_actions.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  Store<BluetoothAppState> store = Store<BluetoothAppState>(
+    bluetoothStateReducer,
+    initialState: BluetoothAppState(robotConnections: {}),
+    middleware: [
+      bluetoothStateBondedDevicesMiddleware,
+      bluetoothStateAskPermissionsMiddleware,
+      bluetoothStateAddBotByDeviceMiddleware
+    ],
+  );
+  store.dispatch(StartBondedDevicesSearch());
+  store.dispatch(StartAskForPermissions());
+  runApp(MaruisMatrixApp(
+    store: store,
+  ));
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MaruisMatrixApp extends StatelessWidget {
+  const MaruisMatrixApp({Key? key, required this.store}) : super(key: key);
 
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  bool bluetoothConnected = true;
-  bool permissionsGranted = true;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
+  final Store<BluetoothAppState> store;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        //hemeMode: ThemeMode.dark,
-        debugShowCheckedModeBanner: false,
-        home: () {
-          if (bluetoothConnected && permissionsGranted) {
-            return const MainScaffold(
-              title: "MatrixController",
-            );
-          } else {
-            return NoBluetoothMenu(onRetry: () {});
-          }
-        }());
+    return StoreProvider<BluetoothAppState>(
+      store: store,
+      child: MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          //hemeMode: ThemeMode.dark,
+          debugShowCheckedModeBanner: false,
+          home: StoreBuilder<BluetoothAppState>(builder: (context, store) {
+            if (store.state.permissionsAccepted) {
+              return const MainScaffold(
+                title: "MatrixController",
+              );
+            } else {
+              return NoBluetoothMenu();
+            }
+          })),
+    );
   }
 }

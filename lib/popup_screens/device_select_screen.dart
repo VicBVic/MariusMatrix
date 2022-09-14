@@ -3,18 +3,20 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/extra_widgets/popup_menu.dart';
 import 'package:flutter_application_1/bluetooth/blue_broadcast_handler.dart';
+import 'package:flutter_application_1/redux/bluetooth_state.dart';
+import 'package:flutter_application_1/redux/bluetooth_state_actions.dart';
 import 'package:flutter_application_1/util/robot_connection.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import '../extra_widgets/menu_button.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:async/async.dart';
 
 class DeviceSelectScreen extends StatefulWidget {
   final Duration connectionTimeLimit;
   final bool checkActivity;
-  final Set<String> usedAdresses;
   const DeviceSelectScreen(
       {Key? key,
       required this.checkActivity,
-      required this.usedAdresses,
       required this.connectionTimeLimit})
       : super(key: key);
 
@@ -22,38 +24,127 @@ class DeviceSelectScreen extends StatefulWidget {
   State<DeviceSelectScreen> createState() => _DeviceSelectScreenState();
 }
 
-class _DeviceSelectScreenState extends State<DeviceSelectScreen> {
+class _DeviceSelectScreenState extends State<DeviceSelectScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _reloadController;
   @override
-  void initState() {}
+  void initState() {
+    _reloadController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+      animationBehavior: AnimationBehavior.preserve,
+      reverseDuration: Duration(seconds: 1),
+    );
+    // _reloadController.stop();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _reloadController.dispose();
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<BluetoothDevice> devices = List<BluetoothDevice>.empty();
+    // _reloadController.stop();
+    return StoreBuilder<BluetoothAppState>(builder: ((context, store) {
+      store.onChange.listen((event) {
+        _reloadController.stop();
+      });
+      List<BluetoothDevice> devices = store.state.bondedDevices;
 
-    List<Widget> list = devices.map((e) {
-      bool used = widget.usedAdresses.contains(e.address);
-      return ListTile(
-          trailing: used ? const Icon(Icons.check) : null,
-          title: Text(e.name ?? "Missingno"),
-          subtitle: Text(e.address),
-          leading: null,
-          onTap: used
-              ? null
-              : () async => await showDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (context) => ConnectingToBotDialog(
-                        isConnected: false,
-                      )));
-    }).toList();
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Choose a device:'),
-      ),
-      body: ListView(
-        children: list,
-      ),
-    );
+      List<Widget> list = devices.map((e) {
+        bool used = store.state.robotConnections
+            .where((element) => element.device == e)
+            .isNotEmpty;
+
+        return ListTile(
+            trailing: used ? const Icon(Icons.check) : null,
+            title: Text(e.name ?? "Missingno"),
+            subtitle: Text(e.address),
+            leading: null,
+            onTap: used
+                ? null
+                : () async {
+                    CancelableOperation connectOperation =
+                        CancelableOperation.fromFuture(BlueBroadcastHandler
+                            .instance
+                            .getConnectionToAdress(e.address));
+                    BluetoothConnection? connection = await showDialog(
+                        barrierDismissible: true,
+                        context: context,
+                        builder: (context) => FutureBuilder(
+                              builder: ((context, snapshot) {
+                                if (snapshot.hasError)
+                                  return SimpleDialog(
+                                      title: Text("Error when connecting!"));
+                                if (snapshot.hasData)
+                                  Navigator.pop(context, snapshot.data);
+                                return SimpleDialog(
+                                  title: Text("Waiting for connection..."),
+                                );
+                              }),
+                              future: connectOperation.value,
+                            ));
+                    connectOperation.cancel();
+                    if (connection == null) return;
+                    CancelableOperation isBotOperation =
+                        CancelableOperation.fromFuture(BlueBroadcastHandler
+                            .instance
+                            .isBotTest(connection));
+                    bool? isBot = await showDialog(
+                        barrierDismissible: true,
+                        context: context,
+                        builder: (context) => FutureBuilder(
+                              builder: ((context, snapshot) {
+                                if (snapshot.hasError)
+                                  return SimpleDialog(
+                                      title: Text(
+                                          "Error when checking is device is bot!"));
+                                if (snapshot.hasData)
+                                  Navigator.pop(context, snapshot.data);
+                                return SimpleDialog(
+                                  title: Text("Checking if device is bot.."),
+                                );
+                              }),
+                              future: isBotOperation.value,
+                            ));
+                    isBotOperation.cancel();
+                    print("$connection $isBot");
+                    if (isBot ?? false) {
+                      store.dispatch(StartAddBotByDevice(e));
+                      Navigator.pop(context);
+                    }
+                    //if (connection is BluetoothConnection) {}
+                  });
+      }).toList();
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Choose a device:'),
+          actions: [
+            RotationTransition(
+              turns: CurvedAnimation(
+                  parent: _reloadController,
+                  curve: Curves.decelerate,
+                  reverseCurve: (Curves.decelerate)),
+              child: IconButton(
+                onPressed: () {
+                  _reloadController..reset();
+                  _reloadController..repeat();
+                  store.dispatch(StartBondedDevicesSearch());
+                },
+                icon: Icon(Icons.replay),
+              ),
+            )
+          ],
+        ),
+        body: ListView(
+          children: list,
+        ),
+      );
+    }));
   }
 }
 
@@ -83,15 +174,5 @@ class ConnectingToBotDialog extends StatelessWidget {
             child: Text(buttonTitle))
       ],
     );
-  }
-}
-
-class _DeviceListTile extends StatelessWidget {
-  final BluetoothDevice device;
-  const _DeviceListTile({required this.device, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }
