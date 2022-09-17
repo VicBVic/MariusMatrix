@@ -1,3 +1,10 @@
+const Map<String, int> musicFileNames = {
+  "muzica": 0,
+  "muzichie": 1,
+  "descalta-te": 2,
+  "jandarmeria": 3
+};
+
 class BotInfo {
   bool? isActive, isManual;
   String? name, musicFileName;
@@ -35,6 +42,14 @@ class BotInfo {
   }
 
   BotInfo.empty() {}
+  BotInfo.fromCompleteBotInfo(CompleteBotInfo info) {
+    isActive = info.isActive;
+    isManual = info.isManual;
+    name = info.name;
+    musicFileName = info.musicFileName;
+    startTimeMinutes = info.startTimeMinutes;
+    endTimeMinutes = info.endTimeMinutes;
+  }
 
   bool isComplete() {
     /*print(

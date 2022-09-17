@@ -16,7 +16,8 @@ void main() {
     middleware: [
       bluetoothStateBondedDevicesMiddleware,
       bluetoothStateAskPermissionsMiddleware,
-      bluetoothStateAddBotByDeviceMiddleware
+      bluetoothStateAddBotByDeviceMiddleware,
+      bluetoothUpdateBotInfoMiddleware,
     ],
   );
   store.dispatch(StartBondedDevicesSearch());

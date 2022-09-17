@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/bluetooth/bot_info.dart';
 import 'package:flutter_application_1/util/robot_connection.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
@@ -24,4 +25,17 @@ class PermisionsAcceptedAction extends BluetoothStateAction {}
 class CompleteBotConnectionAction extends BluetoothStateAction {
   RobotConnection data;
   CompleteBotConnectionAction(this.data);
+}
+
+class DeleteBotConnectionAction extends BluetoothStateAction {
+  BluetoothDevice deviceOfConnection;
+  DeleteBotConnectionAction(this.deviceOfConnection);
+}
+
+class StartAddStoredDevices extends BluetoothStateAction {}
+
+class UpdateBotInfoAction extends BluetoothStateAction {
+  BluetoothDevice device;
+  CompleteBotInfo data;
+  UpdateBotInfoAction(this.device, this.data);
 }

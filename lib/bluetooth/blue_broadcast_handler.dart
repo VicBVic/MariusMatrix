@@ -22,8 +22,15 @@ class BlueBroadcastHandler {
 
   Future<BluetoothConnection?> getConnectionToAdress(String address,
       {int retries = 0}) async {
-    if (_connectionBuffer.containsKey(address))
-      return _connectionBuffer[address];
+    if (_connectionBuffer.containsKey(address)) {
+      var connection = _connectionBuffer[address]!;
+      if (connection.isConnected)
+        return _connectionBuffer[address];
+      else {
+        connection.dispose();
+        _connectionBuffer.remove(address);
+      }
+    }
 
     if (retries > 0) throw ("Cannot connect to address $address.");
 

@@ -41,7 +41,7 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen>
 
   @override
   void dispose() {
-    _reloadController.dispose();
+    //_reloadController.dispose();
     // TODO: implement dispose
     super.dispose();
   }
