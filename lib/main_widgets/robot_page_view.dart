@@ -44,29 +44,37 @@ class RobotPageView extends StatelessWidget {
         controller: controller,
         children: robots.map(
           (robot) {
+            Widget menu;
             if (robot.state == RobotConnectionState.complete) {
-              return LoadedMenu(
+              menu = LoadedMenu(
                 robotConnection: robot,
               );
-            }
+            } else {
+              String headline = "";
+              switch (robot.state) {
+                case RobotConnectionState.connecting:
+                  headline = "Connecting to ${robot.device.name}";
+                  break;
+                case RobotConnectionState.discovering:
+                  headline =
+                      'Trying to find bonded device with adress ${robot.device.address}...';
+                  break;
+                case RobotConnectionState.fetchingInfo:
+                  headline = 'Getting info of ${robot.device.address}...';
+                  break;
+                default:
+                  headline = 'Unexpected state of ${robot.device.address}!';
+              }
 
-            String headline = "";
-            switch (robot.state) {
-              case RobotConnectionState.connecting:
-                headline = "Connecting to ${robot.device.name}";
-                break;
-              case RobotConnectionState.discovering:
-                headline =
-                    'Trying to find bonded device with adress ${robot.device.address}...';
-                break;
-              case RobotConnectionState.fetchingInfo:
-                headline = 'Getting info of ${robot.device.address}...';
-                break;
-              default:
-                headline = 'Unexpected state of ${robot.device.address}!';
+              menu = UnloadedMenu(robotConnection: robot, headline: headline);
             }
-
-            return UnloadedMenu(robotConnection: robot, headline: headline);
+            return AnimatedSwitcher(
+                duration: Duration(milliseconds: 1000),
+                child: menu,
+                transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ));
           },
         ).toList(),
       );

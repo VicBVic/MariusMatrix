@@ -23,7 +23,8 @@ class NoBluetoothMenu extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             TextButton(
-                onPressed: () => store.dispatch(StartAskForPermissions()),
+                onPressed: () =>
+                    store.dispatch(StartAskForPermissions(context)),
                 child: Text("Retry"))
           ],
         ),

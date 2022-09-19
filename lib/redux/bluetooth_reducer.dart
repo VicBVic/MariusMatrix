@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/bluetooth/blue_broadcast_handler.dart';
 import 'package:flutter_application_1/file_access/file_manager.dart';
 
@@ -8,6 +10,7 @@ import 'package:flutter_application_1/redux/bluetooth_state.dart';
 import 'package:flutter_application_1/redux/bluetooth_state_actions.dart';
 import 'package:flutter_application_1/robot_menus/loaded_menu.dart';
 import 'package:flutter_application_1/util/robot_connection.dart';
+import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:redux/redux.dart';
@@ -42,6 +45,8 @@ BluetoothAppState bluetoothStateReducer(
   if (action is DeleteBotConnectionAction) {
     state.robotConnections
         .removeWhere((element) => element.device == action.deviceOfConnection);
+    FileManager.instance.updateAdresses(
+        state.robotConnections.map((e) => e.device.address).toList());
   }
   return state;
 }
@@ -113,13 +118,48 @@ void bluetoothStateAskPermissionsMiddleware(
             print(
                 "here ${value.isGranted} ${value.isDenied} ${value.isPermanentlyDenied} ${value.isRestricted}");
             return value.isGranted;
-          }));
+          })) &&
+          (await _getBackgroundPermissions(action.context)) &&
+          (await AwesomeNotifications().isNotificationAllowed());
       if (accepted) {
         store.dispatch(PermisionsAcceptedAction());
+        store.dispatch(StartBondedDevicesSearch());
       }
     });
   } else
     next(action);
+}
+
+Future<bool> _getBackgroundPermissions(context) async {
+  const config = FlutterBackgroundAndroidConfig(
+    notificationTitle: 'MariusMatrix is running',
+    notificationText:
+        'Your robots are currently detecting any movement in your residence.',
+    //notificationIcon: AndroidResource(name: 'background_icon'),
+    notificationImportance: AndroidNotificationImportance.Default,
+    enableWifiLock: true,
+  );
+
+  bool hasPermissions = await FlutterBackground.hasPermissions;
+  if (!hasPermissions) {
+    await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              title: Text('Permissions needed'),
+              content: Text(
+                  'Shortly the OS will ask you for permission to execute this app in the background. This is required in order to receive chat messages when the app is not in the foreground.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'OK'),
+                  child: const Text('OK'),
+                ),
+              ]);
+        });
+  }
+
+  hasPermissions = await FlutterBackground.initialize(androidConfig: config);
+  return hasPermissions;
 }
 
 void bluetoothStateAddStoredDevices(Store<BluetoothAppState> store) {

@@ -31,9 +31,9 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen>
   void initState() {
     _reloadController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 1),
       animationBehavior: AnimationBehavior.preserve,
-      reverseDuration: Duration(seconds: 1),
+      reverseDuration: const Duration(seconds: 1),
     );
     // _reloadController.stop();
     super.initState();
@@ -78,12 +78,21 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen>
                         builder: (context) => FutureBuilder(
                               builder: ((context, snapshot) {
                                 if (snapshot.hasError)
-                                  return SimpleDialog(
-                                      title: Text("Error when connecting!"));
+                                  return const SimpleDialog(
+                                    title: Text("Error when connecting!"),
+                                    titlePadding: EdgeInsets.all(16.0),
+                                  );
                                 if (snapshot.hasData)
                                   Navigator.pop(context, snapshot.data);
                                 return SimpleDialog(
-                                  title: Text("Waiting for connection..."),
+                                  title:
+                                      const Text("Waiting for connection..."),
+                                  titlePadding: const EdgeInsets.all(16.0),
+                                  children: [
+                                    TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text("Cancel"))
+                                  ],
                                 );
                               }),
                               future: connectOperation.value,
@@ -99,14 +108,23 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen>
                         context: context,
                         builder: (context) => FutureBuilder(
                               builder: ((context, snapshot) {
-                                if (snapshot.hasError)
-                                  return SimpleDialog(
-                                      title: Text(
-                                          "Error when checking is device is bot!"));
+                                if (snapshot.hasError) {
+                                  return const SimpleDialog(
+                                    title: Text(
+                                        "Error when checking is device is bot!"),
+                                    titlePadding: EdgeInsets.all(16.0),
+                                  );
+                                }
                                 if (snapshot.hasData)
                                   Navigator.pop(context, snapshot.data);
                                 return SimpleDialog(
                                   title: Text("Checking if device is bot.."),
+                                  titlePadding: EdgeInsets.all(16.0),
+                                  children: [
+                                    TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: Text("Cancel"))
+                                  ],
                                 );
                               }),
                               future: isBotOperation.value,
@@ -135,7 +153,7 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen>
                   _reloadController..repeat();
                   store.dispatch(StartBondedDevicesSearch());
                 },
-                icon: Icon(Icons.replay),
+                icon: const Icon(Icons.replay),
               ),
             )
           ],

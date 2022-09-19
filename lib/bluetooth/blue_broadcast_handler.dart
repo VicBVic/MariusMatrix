@@ -7,9 +7,17 @@ import 'package:flutter_application_1/bluetooth/alert_manager.dart';
 import 'package:flutter_application_1/bluetooth/bot_info.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
+class _ConnectionWithName {
+  BluetoothConnection connection;
+  String name;
+  _ConnectionWithName(this.connection, this.name);
+}
+
 class BlueBroadcastHandler {
   Map<String, BluetoothConnection> _connectionBuffer = {};
   Map<BluetoothConnection, StreamController<String>> _commandStreamBuffer = {};
+  Map<BluetoothConnection, Stream<_ConnectionWithName>> _alarmStreamBuffer = {};
+  StreamGroup<_ConnectionWithName> _alarmStreamGroup = StreamGroup();
 
   static final BlueBroadcastHandler instance = BlueBroadcastHandler._internal();
 
@@ -17,6 +25,10 @@ class BlueBroadcastHandler {
     return instance;
   }
   final int maxConnectionRetries = 2;
+
+  void addAlarmListener(void Function(_ConnectionWithName) callback) {
+    _alarmStreamGroup.stream.listen(callback);
+  }
 
   Set<BluetoothDevice> _bondedDevicesBuffer = <BluetoothDevice>{};
 
@@ -47,6 +59,12 @@ class BlueBroadcastHandler {
     if (result is BluetoothConnection) {
       print("connected $address!");
       _connectionBuffer[address] = result;
+
+      if (_alarmStreamBuffer[result] == null) {
+        _alarmStreamBuffer[result] = getAlertStream(result, address);
+        _alarmStreamGroup.add(_alarmStreamBuffer[result]!);
+      }
+
       return result;
     }
     print("not connected to $address!");
@@ -61,6 +79,8 @@ class BlueBroadcastHandler {
     });
     return _bondedDevicesBuffer.toList();
   }
+
+  final String alertString = "Alert";
 
   StreamController<String> getCommandStreamController(
       BluetoothConnection connection) {
@@ -92,15 +112,15 @@ class BlueBroadcastHandler {
     connection.output.add(ascii.encode(message));
   }
 
-  Stream<String> getAlertStream(
+  Stream<_ConnectionWithName> getAlertStream(
       BluetoothConnection connection, String name) async* {
     await for (String command
         in getCommandStreamController(connection).stream) {
       command = command.replaceAll('\n', '');
       command = command.replaceAll('\r', '');
-      if (command == "Alert") {
-        print("alert found command $command ${command == "Alert"}");
-        yield name;
+      if (command == alertString) {
+        print("alert found command $command ${command == alertString}");
+        yield _ConnectionWithName(connection, name);
       }
     }
   }

@@ -25,7 +25,8 @@ class UnloadedMenu extends StatefulWidget {
 }
 
 class _UnloadedMenuState extends State<UnloadedMenu>
-    with AutomaticKeepAliveClientMixin<UnloadedMenu> {
+    with TickerProviderStateMixin {
+  late AnimationController _reloadController;
   void forgetAddress(store) {
     showDialog(
         context: context,
@@ -37,6 +38,24 @@ class _UnloadedMenuState extends State<UnloadedMenu>
                     DeleteBotConnectionAction(widget.robotConnection.device));
               }
             }));
+  }
+
+  @override
+  void initState() {
+    //_reloadController.dispose();
+    _reloadController = AnimationController(
+        vsync: this,
+        duration: Duration(seconds: 3),
+        reverseDuration: Duration(seconds: 3))
+      ..repeat();
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _reloadController.dispose(); // TODO: implement dispose
+    super.dispose();
   }
 
   @override
@@ -58,8 +77,14 @@ class _UnloadedMenuState extends State<UnloadedMenu>
         Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 64.0),
-            child: LoadingAnimationWidget.discreteCircle(
-                color: Theme.of(context).primaryColor, size: 200),
+            child: RotationTransition(
+              turns: CurvedAnimation(
+                  parent: _reloadController,
+                  curve: Curves.decelerate,
+                  reverseCurve: (Curves.decelerate)),
+              child: LoadingAnimationWidget.discreteCircle(
+                  color: Theme.of(context).primaryColor, size: 200),
+            ),
           ),
         ),
         //Divider(),

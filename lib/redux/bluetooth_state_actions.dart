@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/bluetooth/bot_info.dart';
 import 'package:flutter_application_1/util/robot_connection.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
@@ -18,7 +19,10 @@ class StartAddBotByDevice extends BluetoothStateAction {
 
 class ErrorAction extends BluetoothStateAction {}
 
-class StartAskForPermissions extends BluetoothStateAction {}
+class StartAskForPermissions extends BluetoothStateAction {
+  BuildContext context;
+  StartAskForPermissions(this.context);
+}
 
 class PermisionsAcceptedAction extends BluetoothStateAction {}
 

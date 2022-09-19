@@ -1,10 +1,17 @@
+import 'dart:math';
+
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/__device_discorvery_screen.dart';
+import 'package:flutter_application_1/bluetooth/blue_broadcast_handler.dart';
+import 'package:flutter_application_1/popup_screens/alert_screen.dart';
 import 'package:flutter_application_1/popup_screens/device_select_screen.dart';
 import 'package:flutter_application_1/file_access/file_manager.dart';
 import 'package:flutter_application_1/redux/bluetooth_state.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'robot_page_view.dart';
+
+const String untriggerString = "Untrigger\n";
 
 class MainScaffold extends StatefulWidget {
   final String? title;
@@ -16,6 +23,47 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold>
     with TickerProviderStateMixin {
+  void createAlertNotification(String address) {
+    AwesomeNotifications().createNotification(
+        content: NotificationContent(
+      id: 10,
+      channelKey: 'alert_channel',
+      title: 'MariusMatrix',
+      body: '$address detected movement!',
+      fullScreenIntent: true,
+      wakeUpScreen: true,
+      criticalAlert: true,
+    ));
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    BlueBroadcastHandler.instance.addAlarmListener((event) {
+      if (event.name != "") {
+        print("found name ${event.name}");
+        createAlertNotification(event.name);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    AlertScreen(botName: event.name, onClose: () {}))).then(
+            (value) => BlueBroadcastHandler.instance
+                .printMessage(event.connection, untriggerString));
+      }
+    });
+    super.initState();
+  }
+
+  TabController? robotPageViewController = null;
+
+  @override
+  void dispose() {
+    robotPageViewController?.dispose();
+    super.dispose();
+  }
+
+  void alarmUser() {}
   @override
   Widget build(BuildContext context) {
     return StoreBuilder<BluetoothAppState>(builder: ((context, store) {
@@ -24,8 +72,13 @@ class _MainScaffoldState extends State<MainScaffold>
                 child: Icon(Icons.computer),
               ))
           .toList();
-      TabController robotPageViewController =
-          TabController(length: tabItems.length, vsync: this);
+      robotPageViewController = TabController(
+          length: tabItems.length,
+          vsync: this,
+          initialIndex: robotPageViewController == null
+              ? 0
+              : min(
+                  max(tabItems.length - 1, 0), robotPageViewController!.index));
       //robotPageViewController.dispose();
       return Scaffold(
         body: NestedScrollView(
@@ -47,7 +100,7 @@ class _MainScaffoldState extends State<MainScaffold>
           ],
           body: RobotPageView(
             onChangedScreen: (ix) {},
-            controller: robotPageViewController,
+            controller: robotPageViewController!,
             checkAvalability: true,
           ),
         ),

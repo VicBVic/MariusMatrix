@@ -93,9 +93,23 @@ class _LoadedMenuState extends State<LoadedMenu> {
         context: context,
         builder: (context) => SimpleDialog(
               title: Text("Pick a new name:"),
+              titlePadding:
+                  EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               children: [
-                TextField(
-                  onChanged: (value) => info.name = value,
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    onChanged: (value) => info.name = value,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 32.0),
+                  child: ElevatedButton(
+                    child: Text("Confirm"),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
                 )
               ],
             ));
@@ -137,7 +151,7 @@ class _LoadedMenuState extends State<LoadedMenu> {
         ListTile(
           enabled: info.isActive,
           title: Text(
-            "${info.name} is currently ${info.isActive ? "ON" : "OFF"}",
+            "${info.name} is currently ${info.isActive ? "ACTIVE" : "INACTIVE"}",
             style: b0?.copyWith(
                 color: (info.isActive ? Colors.green : Colors.red)),
             //style: b1,
@@ -155,6 +169,7 @@ class _LoadedMenuState extends State<LoadedMenu> {
               ),
               onPressed: !info.isManual ? null : () => toggleBotOffOn(store)),
         ),
+        //info.isActive ? Text("To enable editing, turn the bot off.") : Text(""),
         Divider(),
         SwitchListTile(
             value: info.isManual,
