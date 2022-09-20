@@ -28,7 +28,7 @@ class _MainScaffoldState extends State<MainScaffold>
         content: NotificationContent(
       id: 10,
       channelKey: 'alert_channel',
-      title: 'MariusMatrix',
+      title: 'MariusController',
       body: '$address detected movement!',
       fullScreenIntent: true,
       wakeUpScreen: true,

@@ -87,6 +87,15 @@ class _UnloadedMenuState extends State<UnloadedMenu>
             ),
           ),
         ),
+
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            "If the problem persists, try unplugging your robot and plugging it back in again.",
+            textAlign: TextAlign.center,
+            style: b1?.copyWith(color: Colors.black12),
+          ),
+        ),
         //Divider(),
         Padding(
           padding: const EdgeInsets.fromLTRB(32.0, 64.0, 32.0, 0.0),

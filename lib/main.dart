@@ -84,7 +84,7 @@ class _MaruisMatrixAppState extends State<MaruisMatrixApp> {
     return StoreProvider<BluetoothAppState>(
       store: widget.store,
       child: MaterialApp(
-          title: 'Flutter Demo',
+          title: 'MariusController',
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
@@ -93,7 +93,7 @@ class _MaruisMatrixAppState extends State<MaruisMatrixApp> {
           home: StoreBuilder<BluetoothAppState>(builder: (context, store) {
             if (store.state.permissionsAccepted) {
               return const MainScaffold(
-                title: "MatrixController",
+                title: "MariusController",
               );
             } else {
               return NoBluetoothMenu();
