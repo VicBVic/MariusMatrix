@@ -34,6 +34,16 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  flutter_bluetooth_serial: ^0.4.0
+  path_provider: ^2.0.11
+  loading_animation_widget: ^1.2.0+2
+  file_picker: ^5.0.1
+  audioplayers: ^1.0.1
+  permission_handler: ^10.0.0
+  flutter_redux: ^0.10.0
+  flutter_background: ^1.1.0
+  awesome_notifications: ^0.6.21
+  flutter_launcher_icons: ^0.10.0
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +70,10 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/arduino_STOCK.png
+    - assets/Marius.jpeg
+    - assets/warning.png
+    - assets/re_bruh-alarm.mp3
+    #- assets/bruh-alarm.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -86,3 +100,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/MariusIcoB.ico"
+  min_sdk_android: 21 # android min sdk min:16, default 21
