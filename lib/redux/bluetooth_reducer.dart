@@ -1,14 +1,11 @@
-import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/bluetooth/blue_broadcast_handler.dart';
 import 'package:flutter_application_1/file_access/file_manager.dart';
 
 import 'package:flutter_application_1/redux/bluetooth_state.dart';
 import 'package:flutter_application_1/redux/bluetooth_state_actions.dart';
-import 'package:flutter_application_1/robot_menus/loaded_menu.dart';
 import 'package:flutter_application_1/util/robot_connection.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
@@ -60,7 +57,7 @@ void bluetoothStateBondedDevicesMiddleware(
       return List.empty();
     }).then((value) async {
       //debug
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       if (value.isEmpty) {
         store.dispatch(ErrorAction());
       } else {
@@ -68,8 +65,9 @@ void bluetoothStateBondedDevicesMiddleware(
         bluetoothStateAddStoredDevices(store);
       }
     });
-  } else
+  } else {
     next(action);
+  }
 }
 
 void bluetoothStateAddBotByDeviceMiddleware(
@@ -95,8 +93,9 @@ void bluetoothStateAddBotByDeviceMiddleware(
       )));
       bluetoothStateUpdateDevices(store);
     }).onError((error, stackTrace) {});
-  } else
+  } else {
     next(action);
+  }
 }
 
 void bluetoothStateAskPermissionsMiddleware(
@@ -119,8 +118,9 @@ void bluetoothStateAskPermissionsMiddleware(
         store.dispatch(StartBondedDevicesSearch());
       }
     });
-  } else
+  } else {
     next(action);
+  }
 }
 
 Future<bool> _getBackgroundPermissions(context) async {
@@ -139,8 +139,8 @@ Future<bool> _getBackgroundPermissions(context) async {
         context: context,
         builder: (context) {
           return AlertDialog(
-              title: Text('Permissions needed'),
-              content: Text(
+              title: const Text('Permissions needed'),
+              content: const Text(
                   'Shortly the OS will ask you for permission to execute this app in the background. This is required in order to receive chat messages when the app is not in the foreground.'),
               actions: [
                 TextButton(
@@ -178,7 +178,7 @@ void bluetoothUpdateBotInfoMiddleware(
         .firstWhere((element) => element.device == action.device);
     var con = robot.connection;
     var info = CompleteBotInfo.fromBotInfo(robot.botInfo);
-    if (con == null || info == null) throw ("Whoops bot incomplete");
+    if (con == null) throw ("Whoops bot incomplete");
     if (info.name != action.data.name) {
       BlueBroadcastHandler.instance
           .printMessage(con, "name:${action.data.name}\n");
@@ -187,7 +187,7 @@ void bluetoothUpdateBotInfoMiddleware(
       var index = musicFileNames[action.data.musicFileName];
       if (index == null) throw ("Bruh music fine not found");
       BlueBroadcastHandler.instance
-          .printMessage(con, "currentAlarmIndex:${index}\n");
+          .printMessage(con, "currentAlarmIndex:$index\n");
     }
     if (info.isActive != action.data.isActive) {
       BlueBroadcastHandler.instance

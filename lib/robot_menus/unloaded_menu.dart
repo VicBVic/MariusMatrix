@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/extra_widgets/popup_menu.dart';
 import 'package:flutter_application_1/extra_widgets/yes_no_dialog.dart';
 import 'package:flutter_application_1/redux/bluetooth_state.dart';
 import 'package:flutter_application_1/util/robot_connection.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../extra_widgets/menu_button.dart';
 import '../redux/bluetooth_state_actions.dart';
 
 class UnloadedMenu extends StatefulWidget {
@@ -31,7 +28,7 @@ class _UnloadedMenuState extends State<UnloadedMenu>
     showDialog(
         context: context,
         builder: (context) => YesNoDialog(
-            title: Text("Really forget it?"),
+            title: const Text("Really forget it?"),
             response: (response) {
               if (response == true) {
                 store.dispatch(
@@ -45,16 +42,15 @@ class _UnloadedMenuState extends State<UnloadedMenu>
     //_reloadController.dispose();
     _reloadController = AnimationController(
         vsync: this,
-        duration: Duration(seconds: 3),
-        reverseDuration: Duration(seconds: 3))
+        duration: const Duration(seconds: 3),
+        reverseDuration: const Duration(seconds: 3))
       ..repeat();
-    // TODO: implement initState
     super.initState();
   }
 
   @override
   void dispose() {
-    _reloadController.dispose(); // TODO: implement dispose
+    _reloadController.dispose();
     super.dispose();
   }
 
@@ -62,8 +58,7 @@ class _UnloadedMenuState extends State<UnloadedMenu>
   Widget build(BuildContext context) {
     return StoreBuilder<BluetoothAppState>(builder: (context, store) {
       final b1 = Theme.of(context).textTheme.bodyLarge;
-      final b0 = Theme.of(context).textTheme.headlineSmall;
-      final headline = Theme.of(context).textTheme.headline2;
+      final headline = Theme.of(context).textTheme.displayMedium;
 
       final List<Widget> menuItems = [
         Padding(
@@ -102,16 +97,16 @@ class _UnloadedMenuState extends State<UnloadedMenu>
           child: ElevatedButton(
             onPressed: () => store
                 .dispatch(StartAddBotByDevice(widget.robotConnection.device)),
-            child: Text("Retry"),
-            style: ElevatedButton.styleFrom(primary: Colors.blue),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+            child: const Text("Retry"),
           ),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(32.0, 0.0, 32.0, 0.0),
           child: ElevatedButton(
             onPressed: () => forgetAddress(store),
-            child: Text("Forget"),
-            style: ElevatedButton.styleFrom(primary: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text("Forget"),
           ),
         ),
       ];
@@ -122,6 +117,5 @@ class _UnloadedMenuState extends State<UnloadedMenu>
     });
   }
 
-  @override
   bool get wantKeepAlive => true;
 }

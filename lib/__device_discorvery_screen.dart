@@ -45,16 +45,17 @@ class _DeviceDiscoveryScreenState extends State<DeviceDiscoveryScreen> {
   void startDiscovery() {
     _streamSubscription =
         FlutterBluetoothSerial.instance.startDiscovery().listen((event) {
-      if (event.device.type == BluetoothDeviceType.classic)
+      if (event.device.type == BluetoothDeviceType.classic) {
         setState(() {
           final deviceIndex = results.indexWhere(
               (element) => event.device.address == element.device.address);
-          if (deviceIndex >= 0)
+          if (deviceIndex >= 0) {
             results[deviceIndex] = event;
-          else {
+          } else {
             results.add(event);
           }
         });
+      }
     });
 
     _streamSubscription!.onDone(() {
@@ -74,14 +75,14 @@ class _DeviceDiscoveryScreenState extends State<DeviceDiscoveryScreen> {
             isDiscovering
                 ? FittedBox(
                     child: Container(
-                      margin: EdgeInsets.all(16.0),
+                      margin: const EdgeInsets.all(16.0),
                       child: const CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     ),
                   )
                 : IconButton(
-                    icon: Icon(Icons.replay),
+                    icon: const Icon(Icons.replay),
                     onPressed: restartDiscovery,
                   )
           ]),

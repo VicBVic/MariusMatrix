@@ -1,13 +1,9 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/extra_widgets/popup_menu.dart';
 import 'package:flutter_application_1/bluetooth/blue_broadcast_handler.dart';
 import 'package:flutter_application_1/redux/bluetooth_state.dart';
 import 'package:flutter_application_1/redux/bluetooth_state_actions.dart';
-import 'package:flutter_application_1/util/robot_connection.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import '../extra_widgets/menu_button.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:async/async.dart';
 
@@ -77,13 +73,15 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen>
                         context: context,
                         builder: (context) => FutureBuilder(
                               builder: ((context, snapshot) {
-                                if (snapshot.hasError)
+                                if (snapshot.hasError) {
                                   return const SimpleDialog(
                                     title: Text("Error when connecting!"),
                                     titlePadding: EdgeInsets.all(16.0),
                                   );
-                                if (snapshot.hasData)
+                                }
+                                if (snapshot.hasData) {
                                   Navigator.pop(context, snapshot.data);
+                                }
                                 return SimpleDialog(
                                   title:
                                       const Text("Waiting for connection..."),
@@ -115,15 +113,16 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen>
                                     titlePadding: EdgeInsets.all(16.0),
                                   );
                                 }
-                                if (snapshot.hasData)
+                                if (snapshot.hasData) {
                                   Navigator.pop(context, snapshot.data);
+                                }
                                 return SimpleDialog(
-                                  title: Text("Checking if device is bot.."),
-                                  titlePadding: EdgeInsets.all(16.0),
+                                  title: const Text("Checking if device is bot.."),
+                                  titlePadding: const EdgeInsets.all(16.0),
                                   children: [
                                     TextButton(
                                         onPressed: () => Navigator.pop(context),
-                                        child: Text("Cancel"))
+                                        child: const Text("Cancel"))
                                   ],
                                 );
                               }),
@@ -149,8 +148,8 @@ class _DeviceSelectScreenState extends State<DeviceSelectScreen>
                   reverseCurve: (Curves.decelerate)),
               child: IconButton(
                 onPressed: () {
-                  _reloadController..reset();
-                  _reloadController..repeat();
+                  _reloadController.reset();
+                  _reloadController.repeat();
                   store.dispatch(StartBondedDevicesSearch());
                 },
                 icon: const Icon(Icons.replay),

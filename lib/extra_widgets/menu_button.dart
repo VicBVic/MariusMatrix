@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -23,7 +22,7 @@ class _MenuButtonState extends State<MenuButton> {
             alignment: Alignment.centerLeft,
             child: widget.child,
           ),
-          trailing: Icon(Icons.keyboard_arrow_right),
+          trailing: const Icon(Icons.keyboard_arrow_right),
         ),
       ),
     );

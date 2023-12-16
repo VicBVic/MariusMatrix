@@ -41,7 +41,7 @@ class BotInfo {
     print(isComplete());
   }
 
-  BotInfo.empty() {}
+  BotInfo.empty();
   BotInfo.fromCompleteBotInfo(CompleteBotInfo info) {
     isActive = info.isActive;
     isManual = info.isManual;
@@ -68,8 +68,9 @@ class CompleteBotInfo {
   late String name, musicFileName;
   late int startTimeMinutes, endTimeMinutes;
   CompleteBotInfo.fromBotInfo(BotInfo? info) {
-    if (info == null || !info.isComplete())
+    if (info == null || !info.isComplete()) {
       throw ("Info is incomplete or null.");
+    }
     isActive = info.isActive!;
     isManual = info.isManual!;
     name = info.name!;

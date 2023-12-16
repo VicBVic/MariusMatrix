@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:async/async.dart';
 
-import 'package:flutter_application_1/bluetooth/alert_manager.dart';
 import 'package:flutter_application_1/bluetooth/bot_info.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
@@ -14,10 +13,10 @@ class _ConnectionWithName {
 }
 
 class BlueBroadcastHandler {
-  Map<String, BluetoothConnection> _connectionBuffer = {};
-  Map<BluetoothConnection, StreamController<String>> _commandStreamBuffer = {};
-  Map<BluetoothConnection, Stream<_ConnectionWithName>> _alarmStreamBuffer = {};
-  StreamGroup<_ConnectionWithName> _alarmStreamGroup = StreamGroup();
+  final Map<String, BluetoothConnection> _connectionBuffer = {};
+  final Map<BluetoothConnection, StreamController<String>> _commandStreamBuffer = {};
+  final Map<BluetoothConnection, Stream<_ConnectionWithName>> _alarmStreamBuffer = {};
+  final StreamGroup<_ConnectionWithName> _alarmStreamGroup = StreamGroup();
 
   static final BlueBroadcastHandler instance = BlueBroadcastHandler._internal();
 
@@ -30,15 +29,15 @@ class BlueBroadcastHandler {
     _alarmStreamGroup.stream.listen(callback);
   }
 
-  Set<BluetoothDevice> _bondedDevicesBuffer = <BluetoothDevice>{};
+  final Set<BluetoothDevice> _bondedDevicesBuffer = <BluetoothDevice>{};
 
   Future<BluetoothConnection?> getConnectionToAdress(String address,
       {int retries = 0}) async {
     if (_connectionBuffer.containsKey(address)) {
       var connection = _connectionBuffer[address]!;
-      if (connection.isConnected)
+      if (connection.isConnected) {
         return _connectionBuffer[address];
-      else {
+      } else {
         connection.dispose();
         _connectionBuffer.remove(address);
       }

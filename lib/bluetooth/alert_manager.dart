@@ -12,9 +12,7 @@ class AlertManager {
   AlertManager._internal();
 
   void listen() async {
-    print("alertManager entered listen body");
     await for (String name in alertStreams.stream) {
-      print("alertManager found $name");
       for (final callback in listeners) {
         callback(name);
       }
@@ -30,6 +28,5 @@ class AlertManager {
 
   void addStream(Stream<String> stream) {
     alertStreams.add(stream);
-    print("alertMAnager added stream $stream");
   }
 }

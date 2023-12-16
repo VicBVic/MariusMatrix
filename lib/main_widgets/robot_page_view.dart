@@ -1,24 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/bluetooth/blue_broadcast_handler.dart';
 import 'package:flutter_application_1/redux/bluetooth_state.dart';
 import 'package:flutter_application_1/robot_menus/unloaded_menu.dart';
-import 'package:flutter_application_1/robot_menus/unloaded_menu.dart';
-import 'package:flutter_application_1/file_access/file_manager.dart';
-import 'package:flutter_application_1/bluetooth/bot_info.dart';
 import 'package:flutter_application_1/util/robot_connection.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import '../error_menus/no_robots_menu.dart';
 import '../robot_menus/loaded_menu.dart';
-import '../robot_menus/__robot_menu.dart';
-
-enum _DeviceAvailability {
-  no,
-  maybe,
-  yes,
-}
 
 class RobotPageView extends StatelessWidget {
   final bool checkAvalability;
@@ -38,7 +24,7 @@ class RobotPageView extends StatelessWidget {
       final List<RobotConnection> robots =
           store.state.robotConnections.toList();
       if (robots.isEmpty) {
-        return NoRobotsMenu();
+        return const NoRobotsMenu();
       }
       return TabBarView(
         controller: controller,
@@ -69,7 +55,7 @@ class RobotPageView extends StatelessWidget {
               menu = UnloadedMenu(robotConnection: robot, headline: headline);
             }
             return AnimatedSwitcher(
-                duration: Duration(milliseconds: 1000),
+                duration: const Duration(milliseconds: 1000),
                 child: menu,
                 transitionBuilder: (child, animation) => FadeTransition(
                       opacity: animation,

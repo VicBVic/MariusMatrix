@@ -2,11 +2,9 @@ import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/__device_discorvery_screen.dart';
 import 'package:flutter_application_1/bluetooth/blue_broadcast_handler.dart';
 import 'package:flutter_application_1/popup_screens/alert_screen.dart';
 import 'package:flutter_application_1/popup_screens/device_select_screen.dart';
-import 'package:flutter_application_1/file_access/file_manager.dart';
 import 'package:flutter_application_1/redux/bluetooth_state.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'robot_page_view.dart';
@@ -55,7 +53,7 @@ class _MainScaffoldState extends State<MainScaffold>
     super.initState();
   }
 
-  TabController? robotPageViewController = null;
+  TabController? robotPageViewController;
 
   @override
   void dispose() {
@@ -68,7 +66,7 @@ class _MainScaffoldState extends State<MainScaffold>
   Widget build(BuildContext context) {
     return StoreBuilder<BluetoothAppState>(builder: ((context, store) {
       List<Tab> tabItems = store.state.robotConnections
-          .map((e) => Tab(
+          .map((e) => const Tab(
                 child: Icon(Icons.computer),
               ))
           .toList();
@@ -108,7 +106,7 @@ class _MainScaffoldState extends State<MainScaffold>
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
-              builder: ((context) => DeviceSelectScreen(
+              builder: ((context) => const DeviceSelectScreen(
                     connectionTimeLimit: Duration(seconds: 10),
                     checkActivity: false,
                   )),

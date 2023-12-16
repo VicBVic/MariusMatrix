@@ -8,7 +8,6 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'main_widgets/main_scaffold.dart';
 import 'package:redux/redux.dart';
 
-import 'redux/bluetooth_state_actions.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,7 +93,7 @@ class _MaruisMatrixAppState extends State<MaruisMatrixApp> {
                 title: "MariusController",
               );
             } else {
-              return NoBluetoothMenu();
+              return const NoBluetoothMenu();
             }
           })),
     );

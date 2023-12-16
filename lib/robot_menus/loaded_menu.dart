@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/bluetooth/bot_info.dart';
 import 'package:flutter_application_1/redux/bluetooth_state_actions.dart';
@@ -8,7 +6,6 @@ import 'package:flutter_application_1/util/robot_connection.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 
 import '../extra_widgets/yes_no_dialog.dart';
-import '../popup_screens/alert_screen.dart';
 import '../redux/bluetooth_state.dart';
 import 'package:redux/redux.dart';
 
@@ -19,7 +16,7 @@ const int musicFileNamesLen = 4;
 class LoadedMenu extends StatefulWidget {
   final RobotConnection robotConnection;
 
-  LoadedMenu({
+  const LoadedMenu({
     Key? key,
     required this.robotConnection,
   }) : super(key: key);
@@ -35,7 +32,6 @@ class _LoadedMenuState extends State<LoadedMenu> {
 
   late CompleteBotInfo info;
 
-  //TODO: implementea-za prostiile astea cu Redux
   void toggleBotOffOn(store) {
     info.isActive = !info.isActive;
     _refreshBotInfo(store);
@@ -67,7 +63,7 @@ class _LoadedMenuState extends State<LoadedMenu> {
     String? pick = await showDialog(
         context: context,
         builder: (context) => SimpleDialog(
-              title: Text("Pick a song"),
+              title: const Text("Pick a song"),
               children: musicFileNames.keys
                   .map((val) => ListTile(
                         trailing: Radio<String>(
@@ -92,9 +88,9 @@ class _LoadedMenuState extends State<LoadedMenu> {
     await showDialog(
         context: context,
         builder: (context) => SimpleDialog(
-              title: Text("Pick a new name:"),
+              title: const Text("Pick a new name:"),
               titlePadding:
-                  EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -103,9 +99,9 @@ class _LoadedMenuState extends State<LoadedMenu> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 32.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
                   child: ElevatedButton(
-                    child: Text("Confirm"),
+                    child: const Text("Confirm"),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -120,7 +116,7 @@ class _LoadedMenuState extends State<LoadedMenu> {
     showDialog(
         context: context,
         builder: (context) => YesNoDialog(
-            title: Text("Really forget it?"),
+            title: const Text("Really forget it?"),
             response: (response) {
               if (response == true) {
                 store.dispatch(
@@ -143,9 +139,7 @@ class _LoadedMenuState extends State<LoadedMenu> {
   @override
   Widget build(BuildContext context) {
     return StoreBuilder<BluetoothAppState>(builder: (context, store) {
-      final b1 = Theme.of(context).textTheme.bodyLarge;
       final b0 = Theme.of(context).textTheme.headlineSmall;
-      final headline = Theme.of(context).textTheme.headline2;
 
       final List<Widget> menuItems = [
         ListTile(
@@ -161,39 +155,39 @@ class _LoadedMenuState extends State<LoadedMenu> {
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton(
+              onPressed: !info.isManual ? null : () => toggleBotOffOn(store),
               child: Container(
                 padding: const EdgeInsets.all(32.0),
                 child: Text(
                   "Turn ${info.isActive ? "off" : "on"}",
                 ),
-              ),
-              onPressed: !info.isManual ? null : () => toggleBotOffOn(store)),
+              )),
         ),
         //info.isActive ? Text("To enable editing, turn the bot off.") : Text(""),
-        Divider(),
+        const Divider(),
         SwitchListTile(
             value: info.isManual,
             title: Text(
                 "Activation mode: ${info.isManual ? "Manual" : "Scheduled"}"),
             onChanged: (value) => toggleBotManSched(store, value)),
-        Divider(),
+        const Divider(),
         ListTile(
-          leading: Icon(Icons.arrow_forward_ios),
-          title: Text("Scheduled activation time: "),
+          leading: const Icon(Icons.arrow_forward_ios),
+          title: const Text("Scheduled activation time: "),
           trailing:
               Text(minutesToTimeOfDay(info.startTimeMinutes).format(context)),
           enabled: !info.isManual,
           onTap: () => pickStartTime(store, context),
         ),
         ListTile(
-          leading: Icon(Icons.arrow_forward_ios),
-          title: Text("Scheduled deactivation time: "),
+          leading: const Icon(Icons.arrow_forward_ios),
+          title: const Text("Scheduled deactivation time: "),
           trailing:
               Text(minutesToTimeOfDay(info.endTimeMinutes).format(context)),
           enabled: !info.isManual,
           onTap: () => pickEndTime(store, context),
         ),
-        Divider(),
+        const Divider(),
         EditableElementListTile(
           title: "Current alarm:",
           onPressed: () => pickAlarm(store, context),
@@ -202,10 +196,10 @@ class _LoadedMenuState extends State<LoadedMenu> {
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton(
-              onPressed: () => testAlarm(store), child: Text("Test")),
+              onPressed: () => testAlarm(store), child: const Text("Test")),
         ),
-        Divider(),
-        ListTile(
+        const Divider(),
+        const ListTile(
             title: Text(
           "Other info",
           textAlign: TextAlign.center,
@@ -215,13 +209,13 @@ class _LoadedMenuState extends State<LoadedMenu> {
           onPressed: () => changeBotName(store, context),
           value: info.name,
         ),
-        Divider(),
+        const Divider(),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 64.0),
           child: ElevatedButton(
             onPressed: () => forgetAddress(store),
-            child: Text("Forget"),
-            style: ElevatedButton.styleFrom(primary: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text("Forget"),
           ),
         ),
       ];

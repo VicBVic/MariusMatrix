@@ -5,7 +5,7 @@ class AlertScreen extends StatefulWidget {
   final String botName;
   final void Function() onClose;
 
-  AlertScreen({Key? key, required this.botName, required this.onClose})
+  const AlertScreen({Key? key, required this.botName, required this.onClose})
       : super(key: key);
 
   @override
@@ -40,7 +40,7 @@ class _AlertScreenState extends State<AlertScreen> {
             Image.asset(alarmAsset),
             Text(
               "Bot ${widget.botName} has been triggered!",
-              style: Theme.of(context).textTheme.headline3,
+              style: Theme.of(context).textTheme.displaySmall,
               textAlign: TextAlign.center,
             ),
             TextButton(
@@ -48,7 +48,7 @@ class _AlertScreenState extends State<AlertScreen> {
                 widget.onClose();
                 Navigator.pop(context);
               },
-              child: Text("Okay"),
+              child: const Text("Okay"),
             )
           ],
         ),
