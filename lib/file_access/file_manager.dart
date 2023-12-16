@@ -9,25 +9,28 @@ class FileManager {
     return instance;
   }
 
-  FileManager._internal() {
-    documentDir = getApplicationDocumentsDirectory();
-    botAdressesFile = documentDir.then((value) {
-      print(value.path);
-      print("${value.path}/bot_adresses.txt");
-      return File("${value.path}/bot_adresses.txt");
-    });
+  FileManager._internal();
+
+  Future<String> _getDataPath() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return dir.path;
   }
 
-  late Future<Directory> documentDir;
-  late Future<File> botAdressesFile;
+  Future<File> _getBotAdressesFile() async {
+    final path = await _getDataPath();
+    final file = File("$path/botAdresses.txt");
+    if (!(await file.exists())) await file.create(recursive: true);
+    return file;
+  }
 
   Future<List<String>> getBotAdresses() async {
-    String adressesData =
-        await botAdressesFile.then((value) => value.readAsString());
+    final botFile = await _getBotAdressesFile();
+    String adressesData = await botFile.readAsString();
     return adressesData.split('\n');
   }
 
   void updateAdresses(List<String> adresses) async {
-    botAdressesFile.then((value) => value.writeAsString(adresses.join('\n')));
+    final botFile = await _getBotAdressesFile();
+    botFile.writeAsString(adresses.join('\n'));
   }
 }

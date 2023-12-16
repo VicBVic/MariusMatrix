@@ -31,7 +31,7 @@ void main() {
           channelKey: 'alert_channel',
           channelName: 'Alert Notifications',
           channelDescription: 'Notification channel for basic tests',
-          defaultColor: Color(0xFF9D50DD),
+          defaultColor: const Color(0xFF9D50DD),
           ledColor: Colors.white,
           criticalAlerts: true,
           importance: NotificationImportance.Max,
@@ -61,8 +61,7 @@ class MaruisMatrixApp extends StatefulWidget {
 class _MaruisMatrixAppState extends State<MaruisMatrixApp> {
   @override
   void initState() {
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.portraitUp]); // TODO: implement initState
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     super.initState();
   }
 
@@ -80,7 +79,6 @@ class _MaruisMatrixAppState extends State<MaruisMatrixApp> {
 
   @override
   Widget build(BuildContext context) {
-    widget.store.dispatch(StartAskForPermissions(context));
     return StoreProvider<BluetoothAppState>(
       store: widget.store,
       child: MaterialApp(

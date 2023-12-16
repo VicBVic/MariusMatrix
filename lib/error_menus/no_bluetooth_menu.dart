@@ -11,6 +11,7 @@ class NoBluetoothMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StoreBuilder<BluetoothAppState>(builder: (context, store) {
+      store.dispatch(StartAskForPermissions(context));
       return Scaffold(
         appBar: AppBar(
           title: Text("Bluetooth is disabled"),

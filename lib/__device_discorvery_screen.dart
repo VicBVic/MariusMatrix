@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/extra_widgets/popup_menu.dart';
-import 'extra_widgets/menu_button.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 class DeviceDiscoveryScreen extends StatefulWidget {
@@ -45,26 +43,22 @@ class _DeviceDiscoveryScreenState extends State<DeviceDiscoveryScreen> {
   }
 
   void startDiscovery() {
-    print(results);
     _streamSubscription =
         FlutterBluetoothSerial.instance.startDiscovery().listen((event) {
       if (event.device.type == BluetoothDeviceType.classic)
         setState(() {
           final deviceIndex = results.indexWhere(
               (element) => event.device.address == element.device.address);
-          print(deviceIndex);
           if (deviceIndex >= 0)
             results[deviceIndex] = event;
           else {
             results.add(event);
-            print("yes added");
           }
         });
     });
 
     _streamSubscription!.onDone(() {
       setState(() {
-        print("dope");
         isDiscovering = false;
       });
     });
@@ -80,7 +74,7 @@ class _DeviceDiscoveryScreenState extends State<DeviceDiscoveryScreen> {
             isDiscovering
                 ? FittedBox(
                     child: Container(
-                      margin: new EdgeInsets.all(16.0),
+                      margin: EdgeInsets.all(16.0),
                       child: const CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),

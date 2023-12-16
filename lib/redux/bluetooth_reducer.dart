@@ -19,7 +19,6 @@ import '../bluetooth/bot_info.dart';
 
 BluetoothAppState bluetoothStateReducer(
     BluetoothAppState state, dynamic action) {
-  print("reducer bitch ass mf $action");
   if (action is PermisionsAcceptedAction) {
     state.permissionsAccepted = true;
   }
@@ -54,7 +53,6 @@ BluetoothAppState bluetoothStateReducer(
 void bluetoothStateBondedDevicesMiddleware(
     Store<BluetoothAppState> store, dynamic action, NextDispatcher next) {
   if (action is StartBondedDevicesSearch) {
-    print("bruhfuck");
     BlueBroadcastHandler.instance
         .getBondedDevices()
         .onError((error, stackTrace) {
@@ -96,9 +94,7 @@ void bluetoothStateAddBotByDeviceMiddleware(
         botInfo: info,
       )));
       bluetoothStateUpdateDevices(store);
-    }).onError((error, stackTrace) {
-      print("addBotByDevice cuie frate $error $stackTrace");
-    });
+    }).onError((error, stackTrace) {});
   } else
     next(action);
 }
@@ -112,11 +108,8 @@ void bluetoothStateAskPermissionsMiddleware(
       bool accepted = (value ?? false) &&
           (await Permission.location.request().then((value) {
             if (value.isPermanentlyDenied) {
-              print("ErrorAction sent");
               store.dispatch(ErrorAction());
             }
-            print(
-                "here ${value.isGranted} ${value.isDenied} ${value.isPermanentlyDenied} ${value.isRestricted}");
             return value.isGranted;
           })) &&
           (await _getBackgroundPermissions(action.context)) &&
